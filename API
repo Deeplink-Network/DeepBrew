@@ -1,0 +1,12 @@
+# WORK IN PROGRESS
+from flask import *
+import json
+import the_beer_game_sac
+
+app = Flask(__name__)
+
+@app.route('/', methods=['GET'])
+def instructions():
+    data_set= {}
+    json_dump = json.dumps(data_set)
+    return json_dump
