@@ -122,6 +122,9 @@ while True:
         
         # running reward is tracked here, giving the actual progress over time 
         reward_track.append(running_reward)
+        """
+        REWARD
+        """
 
         # calculate expected value from rewards
         # - at each timestep what was the total reward received after that timestep
@@ -163,6 +166,9 @@ while True:
 
         # save loss
         loss_track.append(loss_value)
+        """
+        LOSS
+        """
         # clear loss and reward history
         action_probs_history.clear()
         critic_value_history.clear()

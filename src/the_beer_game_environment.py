@@ -21,7 +21,7 @@ STARTING_DEMAND = 10
 STARTING_BALANCE = 10_000
 STARTING_INVENTORY = 10
 STARTING_BEER_PRICE = 0.005
-ROUNDS = 62
+ROUNDS = 60
 
 # connect to ganache
 ganache_url = 'HTTP://127.0.0.1:8545'
@@ -167,15 +167,7 @@ def reset_balances(balance):
         if account != 'market' and balance != 1: # need to leave behind 1 ETH to cover gas fees, in the event that desired balance is 1, send nothing back
             send_eth('market', account, balance-1) # send back the desired amount -1 
 
-            
-'''
-███████ ███    ██ ██    ██ ██ ██████   ██████  ███    ██ ███    ███ ███████ ███    ██ ████████ 
-██      ████   ██ ██    ██ ██ ██   ██ ██    ██ ████   ██ ████  ████ ██      ████   ██    ██    
-█████   ██ ██  ██ ██    ██ ██ ██████  ██    ██ ██ ██  ██ ██ ████ ██ █████   ██ ██  ██    ██    
-██      ██  ██ ██  ██  ██  ██ ██   ██ ██    ██ ██  ██ ██ ██  ██  ██ ██      ██  ██ ██    ██    
-███████ ██   ████   ████   ██ ██   ██  ██████  ██   ████ ██      ██ ███████ ██   ████    ██    
-                                                                                               
-'''
+# environment starts here
 
 class BeerGameEnv(Env):
     def __init__(self):
@@ -360,18 +352,23 @@ class BeerGameEnv(Env):
         send_beer('retailer', 'market', self.deliveries_to_market[self.round])
 
         # write to text logs (used for live graphs)
-        with open('inventory.txt', 'a') as file:
+        with open('data/inventory.txt', 'a') as file:
             file.write(str(self.round)+', '+str(self.retailer_inventory[self.round])+', '+str(self.wholesaler_inventory[self.round])+
                        ', '+str(self.distributor_inventory[self.round])+', '+str(self.manufacturer_inventory[self.round])+'\n')
             
-        with open('order.txt', 'a') as file:
+        with open('data/order.txt', 'a') as file:
             file.write(str(self.round)+', '+str(self.orders_from_market[self.round])+', '+str(self.orders_from_retailer[self.round])+', '+str(self.orders_from_wholesaler[self.round])+
                        ', '+str(self.orders_from_distributor[self.round])+', '+str(self.orders_from_manufacturer[self.round])+'\n')
             
-        with open('backorder.txt', 'a') as file:
+        with open('data/backorder.txt', 'a') as file:
             file.write(str(self.round)+', '+str(self.retailer_backorder[self.round])+', '+str(self.wholesaler_backorder[self.round])+
                        ', '+str(self.distributor_backorder[self.round])+', '+str(self.manufacturer_backorder[self.round])+'\n')
             
+        with open('data/balance.txt', 'a') as file:
+            file.write(str(self.round)+', '+str(self.retailer_balance[self.round])+', '+str(self.wholesaler_balance[self.round])+
+                       ', '+str(self.distributor_balance[self.round])+', '+str(self.manufacturer_balance[self.round])+'\n')
+
+
         # reward functions
         self.reward = -1*self.distributor_backorder[self.round] + (self.deliveries_to_wholesaler[self.round]-self.orders_from_wholesaler[self.round]) + 0.8*(self.distributor_balance[self.round]-self.distributor_balance[self.round-1])/self.beer_price[self.round] - 0.8*abs(sum(self.orders_from_wholesaler[-4:])-self.distributor_inventory[self.round])
         
@@ -422,9 +419,11 @@ class BeerGameEnv(Env):
         reset_inventories(STARTING_INVENTORY)
         
         # clear text files (used for animated plots)
-        open('inventory.txt', 'w').close()
-        open('order.txt', 'w').close()
-        open('backorder.txt', 'w').close()
+        open('data/inventory.txt', 'w').close()
+        open('data/order.txt', 'w').close()
+        open('data/backorder.txt', 'w').close()
+        open('data/text_files/round.txt', 'w').close()
+        open('data/balance.txt', 'w').close()
         
         # VARIABLES
         # used for indexing
