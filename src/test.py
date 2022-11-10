@@ -1,1 +1,0 @@
-open('inventory.txt', 'w').close()
