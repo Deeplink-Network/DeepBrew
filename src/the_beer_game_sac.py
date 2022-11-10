@@ -8,6 +8,10 @@ from keras import layers
 import pandas as pd
 import matplotlib.pyplot as plt
 
+# open and close loss and rewardfiles to clear the contents
+open('src/data/loss.txt', 'w').close()
+open('src/data/reward.txt', 'w').close()
+
 # neural network shapes
 num_inputs = 8
 num_actions = 100
@@ -122,9 +126,9 @@ while True:
         
         # running reward is tracked here, giving the actual progress over time 
         reward_track.append(running_reward)
-        """
-        REWARD
-        """
+        # write running reward to file
+        with open('src/data/reward.txt', 'a') as file:
+            file.write(str(episode_count)+', '+str(running_reward) + '\n')
 
         # calculate expected value from rewards
         # - at each timestep what was the total reward received after that timestep
@@ -166,9 +170,10 @@ while True:
 
         # save loss
         loss_track.append(loss_value)
-        """
-        LOSS
-        """
+        # write loss to file
+        with open('src/data/loss.txt', 'a') as file:
+            file.write(str(episode_count)+', '+str(loss_value.numpy()) + '\n') 
+
         # clear loss and reward history
         action_probs_history.clear()
         critic_value_history.clear()

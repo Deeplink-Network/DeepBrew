@@ -3,7 +3,7 @@ import json
 
 app = Flask(__name__)
     
-@app.route('/orders', methods=['GET'])
+@app.route('/game/orders', methods=['GET'])
 def order():
     round = []
     orders_from_market = []
@@ -34,13 +34,14 @@ def order():
     orders_from_distributor = [float(i) for i in orders_from_distributor]
     orders_from_manufacturer = [float(i) for i in orders_from_manufacturer]
     
-    # remove the last element of each array
-    round.pop()
-    orders_from_market.pop()
-    orders_from_retailer.pop()
-    orders_from_wholesaler.pop()
-    orders_from_distributor.pop()
-    orders_from_manufacturer.pop()
+    # if the array is not empty, remove the last element of each array
+    if len(round)>0:
+        round.pop()
+        orders_from_market.pop()
+        orders_from_retailer.pop()
+        orders_from_wholesaler.pop()
+        orders_from_distributor.pop()
+        orders_from_manufacturer.pop()    
             
     data_set = {'Round': round,
                 'Manufacturer Orders': orders_from_manufacturer,
@@ -52,7 +53,7 @@ def order():
         
     return json_dump
 
-@app.route('/inventories', methods=['GET'])
+@app.route('/game/inventories', methods=['GET'])
 def inventory():
     round = []
     inventory_at_market = []
@@ -83,13 +84,14 @@ def inventory():
     inventory_at_distributor = [float(i) for i in inventory_at_distributor]
     inventory_at_manufacturer = [float(i) for i in inventory_at_manufacturer]
     
-    # remove the last element of each array
-    round.pop()
-    inventory_at_market.pop()
-    inventory_at_retailer.pop()
-    inventory_at_wholesaler.pop()
-    inventory_at_distributor.pop()
-    inventory_at_manufacturer.pop()
+    # if the array is not empty, remove the last element of each array
+    if len(round)>0:
+        round.pop()
+        inventory_at_market.pop()
+        inventory_at_retailer.pop()
+        inventory_at_wholesaler.pop()
+        inventory_at_distributor.pop()
+        inventory_at_manufacturer.pop()
             
     data_set = {'Round': round,
                 'Manufacturer Inventory': inventory_at_manufacturer,
@@ -101,7 +103,7 @@ def inventory():
         
     return json_dump
 
-@app.route('/backorders', methods=['GET'])
+@app.route('/game/backorders', methods=['GET'])
 def backorder():
     round = []
     backorder_at_market = []
@@ -132,13 +134,14 @@ def backorder():
     backorder_at_distributor = [float(i) for i in backorder_at_distributor]
     backorder_at_manufacturer = [float(i) for i in backorder_at_manufacturer]
     
-    # remove the last element of each array
-    round.pop()
-    backorder_at_market.pop()
-    backorder_at_retailer.pop()
-    backorder_at_wholesaler.pop()
-    backorder_at_distributor.pop()
-    backorder_at_manufacturer.pop()
+    # if the array is not empty, remove the last element of each array
+    if len(round)>0:
+        round.pop()
+        backorder_at_market.pop()
+        backorder_at_retailer.pop()
+        backorder_at_wholesaler.pop()
+        backorder_at_distributor.pop()
+        backorder_at_manufacturer.pop()
 
     data_set = {'Round': round,
                 'Manufacturer Backorder': backorder_at_manufacturer,
@@ -150,7 +153,7 @@ def backorder():
 
     return json_dump
 
-@app.route('/balances', methods=['GET'])
+@app.route('/game/balances', methods=['GET'])
 def balance():  
     round = []
     balance_at_market = []
@@ -180,12 +183,14 @@ def balance():
     balance_at_distributor = [float(i) for i in balance_at_distributor]
     balance_at_manufacturer = [float(i) for i in balance_at_manufacturer]
     
-    # remove the last element of each array
-    round.pop()
-    balance_at_retailer.pop()
-    balance_at_wholesaler.pop()
-    balance_at_distributor.pop()
-    balance_at_manufacturer.pop()
+    # if the array is not empty, remove the last element of each array
+    if len(round)>0:
+        round.pop()
+        balance_at_market.pop()
+        balance_at_retailer.pop()
+        balance_at_wholesaler.pop()
+        balance_at_distributor.pop()
+        balance_at_manufacturer.pop()
             
     data_set = {'Round': round,
                 'Manufacturer Balance': balance_at_manufacturer,
@@ -195,6 +200,68 @@ def balance():
     
     json_dump = json.dumps(data_set)
         
+    return json_dump
+
+@app.route('/model/loss', methods=['GET'])
+def loss():
+    episode = []
+    loss = []
+    
+    loss_data = open('data/loss.txt', 'r').read()
+    loss_data_array = loss_data.split('\n')
+        
+    for loss_line in loss_data_array:
+        if len(loss_line)>1:
+            # split by comma
+            i, l = loss_line.split(',')
+            episode.append(int(i)+1)
+            loss.append(float(l))
+            
+    # convert the string arrays into int arrays
+    episode = [int(i) for i in episode]
+    loss = [float(i) for i in loss]
+    
+    # if the array is not empty, remove the last element of each array
+    if len(episode)>0:
+        episode.pop()
+        loss.pop()
+
+    data_set = {'Episode': episode,
+                'Loss': loss}
+
+    json_dump = json.dumps(data_set)
+
+    return json_dump
+
+@app.route('/model/reward', methods=['GET'])
+def reward():
+    episode = []
+    reward = []
+    
+    reward_data = open('data/reward.txt', 'r').read()
+    reward_data_array = reward_data.split('\n')
+        
+    for reward_line in reward_data_array:
+        if len(reward_line)>1:
+            # split by comma
+            i, r = reward_line.split(',')
+            episode.append(int(i)+1)
+            reward.append(float(r))
+            
+    # convert the string arrays into int arrays
+    episode = [int(i) for i in episode]
+    reward = [float(i) for i in reward]
+    
+    # if the array is not empty, remove the last element of each array
+    if len(episode)>0:
+        episode.pop()
+        reward.pop()
+
+    data_set = {'Episode': episode,
+                'Reward': reward}
+
+    json_dump = json.dumps(data_set)
+
     return json_dump
                                 
 if __name__ == '__main__':

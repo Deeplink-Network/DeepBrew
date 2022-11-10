@@ -352,19 +352,19 @@ class BeerGameEnv(Env):
         send_beer('retailer', 'market', self.deliveries_to_market[self.round])
 
         # write to text logs (used for live graphs)
-        with open('data/inventory.txt', 'a') as file:
+        with open('src/data/inventory.txt', 'a') as file:
             file.write(str(self.round)+', '+str(self.retailer_inventory[self.round])+', '+str(self.wholesaler_inventory[self.round])+
                        ', '+str(self.distributor_inventory[self.round])+', '+str(self.manufacturer_inventory[self.round])+'\n')
             
-        with open('data/order.txt', 'a') as file:
+        with open('src/data/order.txt', 'a') as file:
             file.write(str(self.round)+', '+str(self.orders_from_market[self.round])+', '+str(self.orders_from_retailer[self.round])+', '+str(self.orders_from_wholesaler[self.round])+
                        ', '+str(self.orders_from_distributor[self.round])+', '+str(self.orders_from_manufacturer[self.round])+'\n')
             
-        with open('data/backorder.txt', 'a') as file:
+        with open('src/data/backorder.txt', 'a') as file:
             file.write(str(self.round)+', '+str(self.retailer_backorder[self.round])+', '+str(self.wholesaler_backorder[self.round])+
                        ', '+str(self.distributor_backorder[self.round])+', '+str(self.manufacturer_backorder[self.round])+'\n')
             
-        with open('data/balance.txt', 'a') as file:
+        with open('src/data/balance.txt', 'a') as file:
             file.write(str(self.round)+', '+str(self.retailer_balance[self.round])+', '+str(self.wholesaler_balance[self.round])+
                        ', '+str(self.distributor_balance[self.round])+', '+str(self.manufacturer_balance[self.round])+'\n')
 
@@ -419,11 +419,11 @@ class BeerGameEnv(Env):
         reset_inventories(STARTING_INVENTORY)
         
         # clear text files (used for animated plots)
-        open('data/inventory.txt', 'w').close()
-        open('data/order.txt', 'w').close()
-        open('data/backorder.txt', 'w').close()
-        open('data/text_files/round.txt', 'w').close()
-        open('data/balance.txt', 'w').close()
+        open('src/data/inventory.txt', 'w').close()
+        open('src/data/order.txt', 'w').close()
+        open('src/data/backorder.txt', 'w').close()
+        open('src/data/round.txt', 'w').close()
+        open('src/data/balance.txt', 'w').close()
         
         # VARIABLES
         # used for indexing
