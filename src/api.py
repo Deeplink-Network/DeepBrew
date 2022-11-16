@@ -1,7 +1,11 @@
 from flask import *
+from flask_cors import CORS
+from flask_ngrok import run_with_ngrok
 import json
 
 app = Flask(__name__)
+# run_with_ngrok(app)
+CORS(app)
     
 @app.route('/game/orders', methods=['GET'])
 def order():
@@ -47,7 +51,7 @@ def order():
                 'Manufacturer Orders': orders_from_manufacturer,
                 'Distributor Orders': orders_from_distributor,
                 'Wholesaler Orders': orders_from_wholesaler,
-                'Manufacturer Orders': orders_from_manufacturer}
+                'Retailer Orders': orders_from_retailer}
     
     json_dump = json.dumps(data_set)
         
@@ -94,7 +98,7 @@ def inventory():
                 'Manufacturer Inventory': inventory_at_manufacturer,
                 'Distributor Inventory': inventory_at_distributor,
                 'Wholesaler Inventory': inventory_at_wholesaler,
-                'Manufacturer Inventory': inventory_at_manufacturer}
+                'Retailer Inventory': inventory_at_retailer}
     
     json_dump = json.dumps(data_set)
         
@@ -140,7 +144,7 @@ def backorder():
                 'Manufacturer Backorder': backorder_at_manufacturer,
                 'Distributor Backorder': backorder_at_distributor,
                 'Wholesaler Backorder': backorder_at_wholesaler,
-                'Manufacturer Backorder': backorder_at_manufacturer}
+                'Retailer Backorder': backorder_at_retailer}
     
     json_dump = json.dumps(data_set)
 
@@ -186,7 +190,7 @@ def balance():
                 'Manufacturer Balance': balance_at_manufacturer,
                 'Distributor Balance': balance_at_distributor,
                 'Wholesaler Balance': balance_at_wholesaler,
-                'Manufacturer Balance': balance_at_manufacturer}
+                'Retailer Balance': balance_at_retailer}
     
     json_dump = json.dumps(data_set)
         
@@ -256,3 +260,4 @@ def reward():
                                 
 if __name__ == '__main__':
     app.run(port=7777)
+    # app.run()
