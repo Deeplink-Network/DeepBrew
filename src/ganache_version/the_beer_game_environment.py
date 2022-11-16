@@ -141,6 +141,7 @@ def send_eth(from_account, to_account, amount):
     singed_tx = web3.eth.account.signTransaction(tx, accounts[from_account]['private_key'])
     # send transaction
     tx_hash = web3.eth.sendRawTransaction(singed_tx.rawTransaction)
+    
     # get transaction hash
     # print("Transaction hash: ", web3.toHex(tx_hash))
     # print latest block number
