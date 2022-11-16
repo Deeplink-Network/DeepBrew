@@ -1,7 +1,11 @@
 from flask import *
+from flask_cors import CORS
+from flask_ngrok import run_with_ngrok
 import json
 
 app = Flask(__name__)
+# run_with_ngrok(app)
+CORS(app)
     
 @app.route('/game/orders', methods=['GET'])
 def order():
@@ -47,7 +51,7 @@ def order():
                 'Manufacturer Orders': orders_from_manufacturer,
                 'Distributor Orders': orders_from_distributor,
                 'Wholesaler Orders': orders_from_wholesaler,
-                'Manufacturer Orders': orders_from_manufacturer}
+                'Retailer Orders': orders_from_retailer}
     
     json_dump = json.dumps(data_set)
         
@@ -68,17 +72,15 @@ def inventory():
     for inventory_line in inventory_data_array:
         if len(inventory_line)>1:
             # split by comma
-            i, md, ro, wo, do, mo = inventory_line.split(',')
+            i,  ri, wi, di, mi = inventory_line.split(',')
             round.append(int(i)+1)
-            inventory_at_market.append(float(md))
-            inventory_at_retailer.append(float(ro))
-            inventory_at_wholesaler.append(float(wo))
-            inventory_at_distributor.append(float(do))
-            inventory_at_manufacturer.append(float(mo))
+            inventory_at_retailer.append(float(ri))
+            inventory_at_wholesaler.append(float(wi))
+            inventory_at_distributor.append(float(di))
+            inventory_at_manufacturer.append(float(mi))
             
     # convert the string arrays into int arrays
     round = [int(i) for i in round]
-    inventory_at_market = [float(i) for i in inventory_at_market]
     inventory_at_retailer = [float(i) for i in inventory_at_retailer]
     inventory_at_wholesaler = [float(i) for i in inventory_at_wholesaler]
     inventory_at_distributor = [float(i) for i in inventory_at_distributor]
@@ -87,7 +89,6 @@ def inventory():
     # if the array is not empty, remove the last element of each array
     if len(round)>0:
         round.pop()
-        inventory_at_market.pop()
         inventory_at_retailer.pop()
         inventory_at_wholesaler.pop()
         inventory_at_distributor.pop()
@@ -97,7 +98,7 @@ def inventory():
                 'Manufacturer Inventory': inventory_at_manufacturer,
                 'Distributor Inventory': inventory_at_distributor,
                 'Wholesaler Inventory': inventory_at_wholesaler,
-                'Manufacturer Inventory': inventory_at_manufacturer}
+                'Retailer Inventory': inventory_at_retailer}
     
     json_dump = json.dumps(data_set)
         
@@ -106,7 +107,6 @@ def inventory():
 @app.route('/game/backorders', methods=['GET'])
 def backorder():
     round = []
-    backorder_at_market = []
     backorder_at_retailer = []
     backorder_at_wholesaler = []
     backorder_at_distributor = []
@@ -118,9 +118,8 @@ def backorder():
     for backorder_line in backorder_data_array:
         if len(backorder_line)>1:
             # split by comma
-            i, md, ro, wo, do, mo = backorder_line.split(',')
+            i, ro, wo, do, mo = backorder_line.split(',')
             round.append(int(i)+1)
-            backorder_at_market.append(float(md))
             backorder_at_retailer.append(float(ro))
             backorder_at_wholesaler.append(float(wo))
             backorder_at_distributor.append(float(do))
@@ -128,7 +127,6 @@ def backorder():
             
     # convert the string arrays into int arrays
     round = [int(i) for i in round]
-    backorder_at_market = [float(i) for i in backorder_at_market]
     backorder_at_retailer = [float(i) for i in backorder_at_retailer]
     backorder_at_wholesaler = [float(i) for i in backorder_at_wholesaler]
     backorder_at_distributor = [float(i) for i in backorder_at_distributor]
@@ -137,7 +135,6 @@ def backorder():
     # if the array is not empty, remove the last element of each array
     if len(round)>0:
         round.pop()
-        backorder_at_market.pop()
         backorder_at_retailer.pop()
         backorder_at_wholesaler.pop()
         backorder_at_distributor.pop()
@@ -147,7 +144,7 @@ def backorder():
                 'Manufacturer Backorder': backorder_at_manufacturer,
                 'Distributor Backorder': backorder_at_distributor,
                 'Wholesaler Backorder': backorder_at_wholesaler,
-                'Manufacturer Backorder': backorder_at_manufacturer}
+                'Retailer Backorder': backorder_at_retailer}
     
     json_dump = json.dumps(data_set)
 
@@ -156,7 +153,6 @@ def backorder():
 @app.route('/game/balances', methods=['GET'])
 def balance():  
     round = []
-    balance_at_market = []
     balance_at_retailer = []
     balance_at_wholesaler = []
     balance_at_distributor = []
@@ -177,7 +173,6 @@ def balance():
             
     # convert the string arrays into int arrays
     round = [int(i) for i in round]
-    balance_at_market = [float(i) for i in balance_at_market]
     balance_at_retailer = [float(i) for i in balance_at_retailer]
     balance_at_wholesaler = [float(i) for i in balance_at_wholesaler]
     balance_at_distributor = [float(i) for i in balance_at_distributor]
@@ -186,7 +181,6 @@ def balance():
     # if the array is not empty, remove the last element of each array
     if len(round)>0:
         round.pop()
-        balance_at_market.pop()
         balance_at_retailer.pop()
         balance_at_wholesaler.pop()
         balance_at_distributor.pop()
@@ -196,7 +190,7 @@ def balance():
                 'Manufacturer Balance': balance_at_manufacturer,
                 'Distributor Balance': balance_at_distributor,
                 'Wholesaler Balance': balance_at_wholesaler,
-                'Manufacturer Balance': balance_at_manufacturer}
+                'Retailer Balance': balance_at_retailer}
     
     json_dump = json.dumps(data_set)
         
@@ -266,3 +260,4 @@ def reward():
                                 
 if __name__ == '__main__':
     app.run(port=7777)
+    # app.run()
