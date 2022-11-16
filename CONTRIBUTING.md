@@ -5,3 +5,5 @@ Contributions are vetted, and it would be best if participants reach out to our 
 * Pull requests for bug fixes
 * Bug reports
 * Documentation improvements
+
+Deeplink will soon be launching a DAO through which contributors can be appropriately remunerated and acknowledged for their efforts. Stay tuned for updates on this front.
