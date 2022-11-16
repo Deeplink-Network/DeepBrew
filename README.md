@@ -5,7 +5,7 @@ In addition to the game environemnt, DeepBrew also includes a soft actor-critic 
 
 Stay tuned for further developments as we migrate the system further on-chain via the implementation of smart contract and keeper pairs in lieu of Web3 wallet transactions, along with an interactive GUI frontend demonstration hosted in IPFS.
 
-# Using DeepBrew
+# Using DeepBrew Ganache
 ## DEPENDENCIES
 ### LANGUAGES
 * python
