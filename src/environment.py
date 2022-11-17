@@ -19,12 +19,12 @@ STARTING_DEMAND = 10
 STARTING_BALANCE = 100_000
 STARTING_INVENTORY = 10
 STARTING_BEER_PRICE = 5
-ROUNDS = 30
-GAS_SCALE = 1
+ROUNDS = 60
+GAS_SCALE = 2
 
 # KEYS
-KEEPER_KEY = dotenv.dotenv_values("./keys.env")['KEEPER_KEY']
-INFURA_KEY = dotenv.dotenv_values("./keys.env")['INFURA_KEY']
+KEEPER_KEY = dotenv.dotenv_values("./keys/.env")['KEEPER_KEY']
+INFURA_KEY = dotenv.dotenv_values("./keys/.env")['INFURA_KEY']
 
 # INFURA AND WEB3
 node_url = f'https://goerli.infura.io/v3/{INFURA_KEY}'
@@ -128,21 +128,21 @@ def mint_cash(to_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
     except Exception as e:
         print(e)
         if(str(e) == "{'code': -32000, 'message': 'already known'}"):
-            # wait 15 seconds for block to be mined
+            # wait 20 seconds for block to be mined
             print('waiting for block to be mined...')
-            time.sleep(15)
+            time.sleep(20)
             return
         elif (str(e) == "{'code': -32000, 'message': 'insufficient funds for gas * price + value'}"):
             print('waiting for next block and retrying...')
-            time.sleep(15)
+            time.sleep(20)
             return(mint_cash(to_account, amount, nonce_offset=1))
         elif (str(e) == "{'code': -32000, 'message': 'replacement transaction underpriced'}"):
             print('retrying with 10% higher gas price...')
-            time.sleep(15)
+            time.sleep(20)
             return(mint_cash(to_account, amount, gas_scale=1.11 ,nonce_offset=1))
         elif (str(e) == "{'code': -32000, 'message': 'nonce too low'}"):
             print('retrying with nonce offset...')
-            time.sleep(15)
+            time.sleep(20)
             return(mint_cash(to_account, amount, nonce_offset=1))
         return 
 
@@ -171,34 +171,36 @@ def burn_cash(from_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
                 'nonce': nonce,
             })
         
+        # sign transaction
         print('signing transaction...')
         signed_tx = web3.eth.account.signTransaction(tx, private_key=KEEPER_KEY)
+        # send transaction
         print('sending transaction...')
         tx_hash = web3.eth.sendRawTransaction(signed_tx.rawTransaction)
         print('tx hash:', web3.toHex(tx_hash))
         print('waiting for transaction receipt...')
         web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf)
-        print('transaction complete')
+        print('transaction completed')
             
     # error handling
     except Exception as e:
         print(e)
         if(str(e) == "{'code': -32000, 'message': 'already known'}"):
-            # wait 15 seconds for block to be mined
+            # wait 20 seconds for block to be mined
             print('waiting for block to be mined...')
-            time.sleep(15)
+            time.sleep(20)
             return
         elif (str(e) == "{'code': -32000, 'message': 'insufficient funds for gas * price + value'}"):
             print('waiting for next block and retrying...')
-            time.sleep(15)
+            time.sleep(20)
             return(burn_cash(from_account, amount, nonce_offset=1))
         elif (str(e) == "{'code': -32000, 'message': 'replacement transaction underpriced'}"):
             print('retrying with 10% higher gas price...')
-            time.sleep(15)
+            time.sleep(20)
             return(burn_cash(from_account, amount, gas_scale=1.11 ,nonce_offset=1))
         elif (str(e) == "{'code': -32000, 'message': 'nonce too low'}"):
             print('retrying with nonce offset...')
-            time.sleep(15)
+            time.sleep(20)
             return(burn_cash(from_account, amount, nonce_offset=1))
         return 
     
@@ -206,7 +208,7 @@ def send_cash(from_account, to_account, amount, gas_scale=GAS_SCALE, nonce_offse
     balance = get_balance(from_account)
     if amount > balance:
         amount = balance
-    print('sending ', amount, 'cash from', from_account, 'to', to_account,'...')
+    print('sending', amount, 'cash from', from_account, 'to', to_account,)
     # checks
     try:
         assert from_account in accounts.keys(), 'Invalid account'
@@ -245,22 +247,22 @@ def send_cash(from_account, to_account, amount, gas_scale=GAS_SCALE, nonce_offse
     except Exception as e:
         print(e)
         if(str(e) == "{'code': -32000, 'message': 'already known'}"):
-            # wait 15 seconds for block to be mined
+            # wait 20 seconds for block to be mined
             print('waiting for block to be mined...')
-            time.sleep(15)
+            time.sleep(20)
             return
         elif (str(e) == "{'code': -32000, 'message': 'insufficient funds for gas * price + value'}"):
             print('waiting for next block and retrying...')
-            time.sleep(15)
-            return(send_cash(to_account, amount, nonce_offset=1))
+            time.sleep(20)
+            return(send_cash(from_account, to_account, amount, nonce_offset=1))
         elif (str(e) == "{'code': -32000, 'message': 'replacement transaction underpriced'}"):
             print('retrying with 10% higher gas price...')
-            time.sleep(15)
-            return(send_cash(to_account, amount, gas_scale=1.11 ,nonce_offset=1))
+            time.sleep(20)
+            return(send_cash(from_account, to_account, amount, gas_scale=1.11 ,nonce_offset=1))
         elif (str(e) == "{'code': -32000, 'message': 'nonce too low'}"):
             print('retrying with nonce offset...')
-            time.sleep(15)
-            return(send_cash(to_account, amount, nonce_offset=1))
+            time.sleep(20)
+            return(send_cash(from_account, to_account, amount, nonce_offset=1))
         return 
 
 def get_balance(account):
@@ -318,21 +320,21 @@ def mint_beer(to_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
     except Exception as e:
         print(e)
         if(str(e) == "{'code': -32000, 'message': 'already known'}"):
-            # wait 15 seconds for block to be mined
+            # wait 20 seconds for block to be mined
             print('waiting for block to be mined...')
-            time.sleep(15)
+            time.sleep(20)
             return
         elif (str(e) == "{'code': -32000, 'message': 'insufficient funds for gas * price + value'}"):
             print('waiting for next block and retrying...')
-            time.sleep(15)
+            time.sleep(20)
             return(mint_beer(to_account, amount, nonce_offset=1))
         elif (str(e) == "{'code': -32000, 'message': 'replacement transaction underpriced'}"):
             print('retrying with 10% higher gas price...')
-            time.sleep(15)
+            time.sleep(20)
             return(mint_beer(to_account, amount, gas_scale=1.11 ,nonce_offset=1))
         elif (str(e) == "{'code': -32000, 'message': 'nonce too low'}"):
             print('retrying with nonce offset...')
-            time.sleep(15)
+            time.sleep(20)
             return(mint_beer(to_account, amount, nonce_offset=1))
         return 
 
@@ -370,32 +372,32 @@ def burn_beer(from_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
         print('tx hash:', web3.toHex(tx_hash))
         print('waiting for transaction receipt...')
         web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf)
-        print('transaction successful')
+        print('transaction completed')
         
     # error handling
     except Exception as e:
         print(e)
         if(str(e) == "{'code': -32000, 'message': 'already known'}"):
-            # wait 15 seconds for block to be mined
+            # wait 20 seconds for block to be mined
             print('waiting for block to be mined...')
-            time.sleep(15)
+            time.sleep(20)
             return
         elif (str(e) == "{'code': -32000, 'message': 'insufficient funds for gas * price + value'}"):
             print('waiting for next block and retrying...')
-            time.sleep(15)
+            time.sleep(20)
             return(burn_beer(from_account, amount, nonce_offset=1))
         elif (str(e) == "{'code': -32000, 'message': 'replacement transaction underpriced'}"):
             print('retrying with 10% higher gas price...')
-            time.sleep(15)
+            time.sleep(20)
             return(burn_beer(from_account, amount, gas_scale=1.11 ,nonce_offset=1))
         elif (str(e) == "{'code': -32000, 'message': 'nonce too low'}"):
             print('retrying with nonce offset...')
-            time.sleep(15)
+            time.sleep(20)
             return(burn_beer(from_account, amount, nonce_offset=1))
         return 
 
 def send_beer(from_account, to_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
-    print('sending ', amount, 'BEER from', from_account, 'to', to_account, '...')
+    print('sending', amount, 'BEER from', from_account, 'to', to_account)
     inventory = get_inventory(from_account)
     if amount > inventory: 
         amount = inventory
@@ -436,22 +438,22 @@ def send_beer(from_account, to_account, amount, gas_scale=GAS_SCALE, nonce_offse
     except Exception as e:
         print(e)
         if(str(e) == "{'code': -32000, 'message': 'already known'}"):
-            # wait 15 seconds for block to be mined
+            # wait 20 seconds for block to be mined
             print('waiting for block to be mined...')
-            time.sleep(15)
+            time.sleep(20)
             return
         elif (str(e) == "{'code': -32000, 'message': 'insufficient funds for gas * price + value'}"):
             print('waiting for next block and retrying...')
-            time.sleep(15)
-            return(send_beer(to_account, amount, nonce_offset=1))
+            time.sleep(20)
+            return(send_beer(from_account, to_account, amount, nonce_offset=1))
         elif (str(e) == "{'code': -32000, 'message': 'replacement transaction underpriced'}"):
             print('retrying with 10% higher gas price...')
-            time.sleep(15)
-            return(send_beer(to_account, amount, gas_scale=1.11 ,nonce_offset=1))
+            time.sleep(20)
+            return(send_beer(from_account, to_account, amount, gas_scale=1.11 ,nonce_offset=1))
         elif (str(e) == "{'code': -32000, 'message': 'nonce too low'}"):
             print('retrying with nonce offset...')
-            time.sleep(15)
-            return(send_beer(to_account, amount, nonce_offset=1))
+            time.sleep(20)
+            return(send_beer(from_account, to_account, amount, nonce_offset=1))
         return 
 
 def get_inventory(account):
@@ -473,16 +475,17 @@ def reset_inventories(amount):
     except AssertionError as e:
         print(e)
         return
-    for account in accounts[:-1]:
-        inventory = get_inventory(account)
-        print(account, 'inventory: ', inventory)
-        if amount < inventory:
-            burn_beer(account, inventory-amount)
-        elif amount > inventory:
-            mint_beer(account, amount-inventory)
-        else:
-            print('inventory already at', amount)
-            continue
+    for account in accounts:
+        if account != 'market':
+            inventory = get_inventory(account)
+            print(account, 'inventory: ', inventory)
+            if amount < inventory:
+                burn_beer(account, inventory-amount)
+            elif amount > inventory:
+                mint_beer(account, amount-inventory)
+            else:
+                print('inventory already at', amount)
+                continue
         
 def reset_balances(amount):
     print()
@@ -493,16 +496,17 @@ def reset_balances(amount):
     except AssertionError as e:
         print(e)
         return
-    for account in accounts[:-1]:
-        balance = get_balance(account)
-        print(account, 'balance: ', balance)
-        if amount < balance:
-            burn_cash(account, int(balance-amount))
-        elif amount > balance:
-            mint_cash(account, int(amount-balance))
-        else:
-            print('balance already at', amount)
-            continue
+    for account in accounts:
+        if account != 'market':
+            balance = get_balance(account)
+            print(account, 'balance: ', balance)
+            if amount < balance:
+                burn_cash(account, int(balance-amount))
+            elif amount > balance:
+                mint_cash(account, int(amount-balance))
+            else:
+                print('balance already at', amount)
+                continue
 
 # environment starts here
 class BeerGameEnv(Env):

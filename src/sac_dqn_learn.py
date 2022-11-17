@@ -162,7 +162,7 @@ def learn():
         # normal saving at every time step
         model.save_weights("src/models/Actor_Critic.h5")
         # running reward condition to consider the task solved, this number is relatively arbitrary
-        if running_reward > 15:  
+        if running_reward > 1500:  
             print("Solved at episode {}!".format(episode_count))
             # save the model once the running reward condition is met
             model.save_weights("src/models/Final_Weights_Actor_Critic.h5")
