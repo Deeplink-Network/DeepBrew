@@ -1,3 +1,6 @@
+'''
+trains a model using the Actor-critic method to play the on-chain beer game as the distributor
+'''
 from environment import BeerGameEnv
 import numpy as np
 import tensorflow as tf
@@ -157,17 +160,17 @@ def learn():
         df = env.df
 
         # normal saving at every time step
-        model.save_weights("Actor_Critic.h5")
+        model.save_weights("src/models/Actor_Critic.h5")
         # running reward condition to consider the task solved, this number is relatively arbitrary
         if running_reward > 15:  
             print("Solved at episode {}!".format(episode_count))
             # save the model once the running reward condition is met
-            model.save_weights("Final_Weights_Actor_Critic.h5")
+            model.save_weights("src/models/Final_Weights_Actor_Critic.h5")
             break
 
     # save reward and loss plot data in model directory 
-    np.save("Reward_Plot_data.npy", reward_track, allow_pickle=True)
-    np.save("Loss_Plot_data.npy", loss_track, allow_pickle=True)
+    np.save("src/models/Reward_Plot_data.npy", reward_track, allow_pickle=True)
+    np.save("src/models/Loss_Plot_data.npy", loss_track, allow_pickle=True)
     
 if __name__ == '__main__':
     # start training
@@ -177,10 +180,10 @@ if __name__ == '__main__':
     except Exception as e:
         print(e)
         print()
-        print('continuing training')
+        print('continuing training...')
         try: 
-            print('loading weights')
-            model.load_weights("Actor_Critic.h5")
+            print('loading weights...')
+            model.load_weights("src/models/Actor_Critic.h5")
         except Exception as e:
             print(e)
         learn()
