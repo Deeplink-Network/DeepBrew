@@ -29,6 +29,7 @@ web3 = Web3(Web3.HTTPProvider(ganache_url))
 
 # accounts dictionary
 # mnemonic: myth like bonus scare over problem client lizard pioneer submit female collect
+# THESE ARE NOT WALLETS THAT EXIST ON ANY PUBLIC NETWORK, THE PRIVATE KEYS ARE NOT REAL
 accounts = {
     'manufacturer': {
         'address': '0xFE41FE950d4835bD539AC24fBaaDED16b2E32922',

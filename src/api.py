@@ -1,10 +1,8 @@
 from flask import *
 from flask_cors import CORS
-from flask_ngrok import run_with_ngrok
 import json
 
 app = Flask(__name__)
-# run_with_ngrok(app)
 CORS(app)
     
 @app.route('/game/orders', methods=['GET'])
@@ -48,6 +46,7 @@ def order():
         orders_from_manufacturer.pop()    
             
     data_set = {'Round': round,
+                'Market Demand': orders_from_market,
                 'Manufacturer Orders': orders_from_manufacturer,
                 'Distributor Orders': orders_from_distributor,
                 'Wholesaler Orders': orders_from_wholesaler,
@@ -60,7 +59,6 @@ def order():
 @app.route('/game/inventories', methods=['GET'])
 def inventory():
     round = []
-    inventory_at_market = []
     inventory_at_retailer = []
     inventory_at_wholesaler = []
     inventory_at_distributor = []
@@ -260,4 +258,3 @@ def reward():
                                 
 if __name__ == '__main__':
     app.run(port=7777)
-    # app.run()

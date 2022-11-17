@@ -1,12 +1,8 @@
 from environment import BeerGameEnv
-from stable_baselines3 import SAC
-import gym
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 from keras import layers
-import pandas as pd
-import matplotlib.pyplot as plt
 import sac_dqn_run
 
 # open and close loss and rewardfiles to clear the contents
@@ -30,15 +26,13 @@ critic = layers.Dense(1)(dense2)
 
 # define and build model
 model = keras.Model(inputs=inputs, outputs=[action, critic])
-
 model.build(input_shape = num_inputs)
 
 # uncomment this to load weights from previously fully trained weights
-#model.load_weights("models/Final_Weights_Actor_Critic.h5")
+# model.load_weights("Final_Weights_Actor_Critic.h5")
 
 # weights are saved after each episode, uncomment this to load the weights from the last episode, this can be useful if training is interrupted
-# model.load_weights("models/Actor_Critic.h5")
-
+# model.load_weights("Actor_Critic.h5")
 env = BeerGameEnv()
 
 # discount rate, may need some tweaking (increase if rewards at the end of each episodes are more important, decrease if if rewards after each step are more important)
@@ -61,141 +55,135 @@ eps = np.finfo(np.float32).eps.item()
 # model = SAC("MlpPolicy", env, verbose=1)
 # model.learn(total_timesteps=10000, log_interval=1)
 
-# models can be salved, loaded, and deleted as follows:
-# model.save("sac_beer_game")
-# model = SAC.load("sac_beer_game")
-# del model 
-
-'''_ = env.reset()
-obs = env.observation_space.sample()
-obs = np.squeeze(obs)
-obs = tf.convert_to_tensor(obs)
-obs = tf.expand_dims(obs, 0)
-action_probs, critic_value = model(obs)
-critic_value_history.append(critic_value[0, 0])
-
-action = np.random.choice(num_actions, p=np.squeeze(action_probs))
-action_probs_history.append(tf.math.log(action_probs[0, action]))
-action = np.expand_dims(action, axis=0)
-
-obs, reward, done, info = env.step(action)
-obs = np.asarray(obs, dtype=np.float32)
-print(obs, type(obs))
-obs = tf.convert_to_tensor(obs)
-print(obs, type(obs))
-rewards_history.append(reward)
-_ = env.reset()
-'''
-
 loss_track = []
 reward_track = []
-while True:
-    _ = env.reset()
-    obs = env.observation_space.sample()
-    done = False
-    episode_reward = 0
-    
-    obs = np.squeeze(obs)
-    
-    old_reward = 0
-    with tf.GradientTape() as tape:
-        while not done:    
-            obs = tf.convert_to_tensor(obs)
-            obs = tf.expand_dims(obs, 0)
-
-            action_probs, critic_value = model(obs)
-            critic_value_history.append(critic_value[0, 0])
-            
-            action = np.random.choice(num_actions, p=np.squeeze(action_probs))
-            action_probs_history.append(tf.math.log(action_probs[0, action]))
-            action = np.expand_dims(action, axis=0)
-            print("Action_taken:", action)
-            obs, curr_reward, done, info = env.step(action)
-            reward = old_reward - curr_reward
-            old_reward = curr_reward
-            print("Reward...: ", reward)
-            print(obs)
-            obs = np.asarray(obs, dtype=np.float32)
-            rewards_history.append(reward)
-            episode_reward += reward        
-            env.render()
-        env.reset()
-
-        # update running reward to check condition for solving
-        running_reward = 0.05 * episode_reward + (1 - 0.05) * running_reward
+def learn():
+    while True:
+        _ = env.reset()
+        obs = env.observation_space.sample()
+        done = False
+        episode_reward = 0
         
-        # running reward is tracked here, giving the actual progress over time 
-        reward_track.append(running_reward)
-        # write running reward to file
-        with open('src/data/reward.txt', 'a') as file:
-            file.write(str(episode_count)+', '+str(running_reward) + '\n')
+        obs = np.squeeze(obs)
+        
+        old_reward = 0
+        with tf.GradientTape() as tape:
+            while not done:    
+                obs = tf.convert_to_tensor(obs)
+                obs = tf.expand_dims(obs, 0)
 
-        # calculate expected value from rewards
-        # - at each timestep what was the total reward received after that timestep
-        # - rewards in the past are discounted by multiplying them with gamma
-        # - these are the labels for our critic
-        returns = []
-        discounted_sum = 0
-        for r in rewards_history[::-1]:
-            discounted_sum = r + gamma * discounted_sum
-            returns.insert(0, discounted_sum)
+                action_probs, critic_value = model(obs)
+                critic_value_history.append(critic_value[0, 0])
+                
+                action = np.random.choice(num_actions, p=np.squeeze(action_probs))
+                action_probs_history.append(tf.math.log(action_probs[0, action]))
+                action = np.expand_dims(action, axis=0)
+                print("Action_taken:", action)
+                obs, curr_reward, done, info = env.step(action)
+                reward = old_reward - curr_reward
+                old_reward = curr_reward
+                print("Reward...: ", reward)
+                # print(obs)
+                obs = np.asarray(obs, dtype=np.float32)
+                rewards_history.append(reward)
+                episode_reward += reward        
+                env.render()
+            env.reset()
 
-        # normalize
-        returns = np.array(returns)
-        returns = (returns - np.mean(returns)) / (np.std(returns) + eps)
-        returns = returns.tolist()
+            # update running reward to check condition for solving
+            running_reward = 0.05 * episode_reward + (1 - 0.05) * running_reward
+            
+            # running reward is tracked here, giving the actual progress over time 
+            reward_track.append(running_reward)
+            # write running reward to file
+            with open('src/data/reward.txt', 'a') as file:
+                file.write(str(episode_count)+', '+str(running_reward) + '\n')
 
-        # calculating loss values to update our network
-        history = zip(action_probs_history, critic_value_history, returns)
-        actor_losses = []
-        critic_losses = []
-        for log_prob, value, ret in history:            
-            '''
-            at this point, the critic estimates a total reward = 'value' in the future
-            the agent takes an action with log probability = 'log_prob', and receives a reward = 'ret'
-            the actor must then be updated to predict an action that leads t
-            '''
-            diff = ret - value
-            actor_losses.append(-log_prob * diff)  # actor loss
+            # calculate expected value from rewards
+            # - at each timestep what was the total reward received after that timestep
+            # - rewards in the past are discounted by multiplying them with gamma
+            # - these are the labels for our critic
+            returns = []
+            discounted_sum = 0
+            for r in rewards_history[::-1]:
+                discounted_sum = r + gamma * discounted_sum
+                returns.insert(0, discounted_sum)
 
-            # critic is updated so that it better estimates future rewards
-            critic_losses.append(
-                huber_loss(tf.expand_dims(value, 0), tf.expand_dims(ret, 0))
-            )
+            # normalize
+            returns = np.array(returns)
+            returns = (returns - np.mean(returns)) / (np.std(returns) + eps)
+            returns = returns.tolist()
 
-        # backpropagation
-        loss_value = sum(actor_losses) + sum(critic_losses)
-        grads = tape.gradient(loss_value, model.trainable_variables)
-        optimizer.apply_gradients(zip(grads, model.trainable_variables))
+            # calculating loss values to update our network
+            history = zip(action_probs_history, critic_value_history, returns)
+            actor_losses = []
+            critic_losses = []
+            for log_prob, value, ret in history:            
+                '''
+                at this point, the critic estimates a total reward = 'value' in the future
+                the agent takes an action with log probability = 'log_prob', and receives a reward = 'ret'
+                the actor must then be updated to predict an action that leads t
+                '''
+                diff = ret - value
+                actor_losses.append(-log_prob * diff)  # actor loss
 
-        # save loss
-        loss_track.append(loss_value)
-        # write loss to file
-        with open('src/data/loss.txt', 'a') as file:
-            file.write(str(episode_count)+', '+str(loss_value.numpy()) + '\n') 
+                # critic is updated so that it better estimates future rewards
+                critic_losses.append(
+                    huber_loss(tf.expand_dims(value, 0), tf.expand_dims(ret, 0))
+                )
 
-        # clear loss and reward history
-        action_probs_history.clear()
-        critic_value_history.clear()
-        rewards_history.clear()
+            # backpropagation
+            loss_value = sum(actor_losses) + sum(critic_losses)
+            grads = tape.gradient(loss_value, model.trainable_variables)
+            optimizer.apply_gradients(zip(grads, model.trainable_variables))
 
-    # log details
-    episode_count += 1
-    template = "running reward: {:.2f} at episode {}"
-    print(template.format(running_reward, episode_count))
+            # save loss
+            loss_track.append(loss_value)
+            # write loss to file
+            with open('src/data/loss.txt', 'a') as file:
+                file.write(str(episode_count)+', '+str(loss_value.numpy()) + '\n') 
 
-    # create a dataframe of each game
-    df = env.df
+            # clear loss and reward history
+            action_probs_history.clear()
+            critic_value_history.clear()
+            rewards_history.clear()
 
-    # normal saving at every time step
-    model.save_weights("models/Actor_Critic.h5")
-    # running reward condition to consider the task solved, this number is relatively arbitrary
-    if running_reward > 1800:  
-        print("Solved at episode {}!".format(episode_count))
-        # save the model once the running reward condition is met
-        model.save_weights("models/Final_Weights_Actor_Critic.h5")
-        break
+        # log details
+        episode_count += 1
+        template = "running reward: {:.2f} at episode {}"
+        print(template.format(running_reward, episode_count))
 
-# save reward and loss plot data in model directory 
-np.save("models/Reward_Plot_data.npy", reward_track, allow_pickle=True)
-np.save("models/Loss_Plot_data.npy", loss_track, allow_pickle=True)
+        # create a dataframe of each game
+        df = env.df
+
+        # normal saving at every time step
+        model.save_weights("Actor_Critic.h5")
+        # running reward condition to consider the task solved, this number is relatively arbitrary
+        if running_reward > 15:  
+            print("Solved at episode {}!".format(episode_count))
+            # save the model once the running reward condition is met
+            model.save_weights("Final_Weights_Actor_Critic.h5")
+            break
+
+    # save reward and loss plot data in model directory 
+    np.save("Reward_Plot_data.npy", reward_track, allow_pickle=True)
+    np.save("Loss_Plot_data.npy", loss_track, allow_pickle=True)
+    
+if __name__ == '__main__':
+    # start training
+    try:
+        learn()
+    # if interrupted, try loading weights and run again, if no weights are found, start from scratch
+    except Exception as e:
+        print(e)
+        print()
+        print('continuing training')
+        try: 
+            print('loading weights')
+            model.load_weights("Actor_Critic.h5")
+        except Exception as e:
+            print(e)
+        learn()
+            
+    # once trained, run the model indefinitely
+    sac_dqn_run.run_model()

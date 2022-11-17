@@ -1,13 +1,10 @@
 '''
-a custom reinforcement learning environment in accordance with openai's gym framework for the beer game
+a custom reinforcement learning environment in accordance with openai's gym framework for the on-chain beer game
 '''
 # environment libraries
 from gym import Env
 from gym.spaces import Box
-import pandas as pd
 import numpy as np
-import warnings
-warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 # game libraries
 from web3 import Web3
@@ -15,14 +12,15 @@ import numpy as np
 from gbm import GBM
 import json
 import os
+import time
 
 # GLOBAL VARIABLES
 STARTING_DEMAND = 10
-STARTING_BALANCE = 200
+STARTING_BALANCE = 100_000
 STARTING_INVENTORY = 10
 STARTING_BEER_PRICE = 5
-ROUNDS = 10
-GAS_SCALE = 3
+ROUNDS = 30
+GAS_SCALE = 1.5
 
 # KEYS
 KEEPER_KEY = os.environ.get('KEEPER_KEY')
@@ -89,8 +87,12 @@ accounts = {'manufacturer': {
             }
 
 # FUNCTIONS
+# keeper functions
+def get_keeper_eth_balance():
+    return float(web3.eth.getBalance(keeper_address))/ 10**18
+
 # cash functions
-def mint_cash(to_account, amount, gas_scale=GAS_SCALE):
+def mint_cash(to_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
     print('minting ', amount, ' CASH to ', to_account)
     # checks
     try:
@@ -101,7 +103,7 @@ def mint_cash(to_account, amount, gas_scale=GAS_SCALE):
         return
     try:
         # calculate nonce from keeper address
-        nonce = web3.eth.getTransactionCount(keeper_address)
+        nonce = web3.eth.getTransactionCount(keeper_address) + nonce_offset
         # build transaction
         tx = cash_contract.functions.mint(
             accounts[to_account]['address'],
@@ -118,16 +120,23 @@ def mint_cash(to_account, amount, gas_scale=GAS_SCALE):
         print('sending transaction...')
         tx_hash = web3.eth.sendRawTransaction(signed_tx.rawTransaction)
         print('waiting for transaction receipt...')
-        web3.eth.waitForTransactionReceipt(tx_hash)
+        web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf)
         print('transaction completed')
     
-    # if the transaction is replacing a pending transaction, the gas price must be increased
-    except ValueError:
-        print('Retrying transaction with 20% higher gas price...')
-        # retry with higher gas price
-        return burn_cash(to_account, amount, gas_scale*1.2) 
+    # error handling
+    except Exception as e:
+        print(e)
+        if(str(e) == "{'code': -32000, 'message': 'already known'}"):
+            # wait 15 seconds for block to be mined
+            print('waiting for block to be mined...')
+            time.sleep(15)
+            return
+        elif (str(e) == "{'code': -32000, 'message': 'insufficient funds for gas * price + value'}"):
+            time.sleep(15)
+            return(mint_cash(to_account, amount, nonce_offset=1))
+        return 
 
-def burn_cash(from_account, amount, gas_scale=GAS_SCALE):
+def burn_cash(from_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
     print('burning ', amount, 'cash from ', from_account,'...')
     balance = get_balance(from_account)
     if amount > balance:
@@ -142,7 +151,7 @@ def burn_cash(from_account, amount, gas_scale=GAS_SCALE):
         return
 
     try:
-        nonce = web3.eth.getTransactionCount(keeper_address)
+        nonce = web3.eth.getTransactionCount(keeper_address) + nonce_offset
         tx = cash_contract.functions.burn(
             accounts[from_account]['address'], 
             int(amount*10**18)).buildTransaction({
@@ -157,23 +166,33 @@ def burn_cash(from_account, amount, gas_scale=GAS_SCALE):
         print('sending transaction...')
         tx_hash = web3.eth.sendRawTransaction(signed_tx.rawTransaction)
         print('waiting for transaction receipt...')
-        web3.eth.waitForTransactionReceipt(tx_hash)
+        web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf)
         print('transaction complete')
             
-    # if the transaction is replacing a pending transaction, the gas price must be increased
-    except ValueError:
-        print('Retrying transaction with 20% higher gas price...')
-        # retry with higher gas price
-        return burn_cash(from_account, amount, gas_scale*1.2) 
+    # error handling
+    except Exception as e:
+        print(e)
+        if(str(e) == "{'code': -32000, 'message': 'already known'}"): 
+            # wait 15 seconds for block to be mined
+            print('waiting for block to be mined...')
+            time.sleep(15)
+            return
+        elif (str(e) == "{'code': -32000, 'message': 'insufficient funds for gas * price + value'}"):
+            time.sleep(15)
+            return(burn_cash(from_account, amount, nonce_offset=1))
+        return
     
-def send_cash(from_account, to_account, amount, gas_scale=GAS_SCALE):
+def send_cash(from_account, to_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
+    balance = get_balance(from_account)
+    if amount > balance:
+        amount = balance
     print('sending ', amount, 'cash from', from_account, 'to', to_account,'...')
     # checks
     try:
         assert from_account in accounts.keys(), 'Invalid account'
         assert to_account in accounts.keys(), 'Invalid account'
         assert amount > 0, 'Invalid amount'
-        assert amount <= get_balance(from_account), 'Insufficient balance'
+        # assert amount <= get_balance(from_account), 'Insufficient balance'
     except AssertionError as e:
         print(e)
         return
@@ -181,7 +200,7 @@ def send_cash(from_account, to_account, amount, gas_scale=GAS_SCALE):
     balance_before = get_balance(from_account)
     try:
         # calculate nonce from keeper address
-        nonce = web3.eth.getTransactionCount(keeper_address)
+        nonce = web3.eth.getTransactionCount(keeper_address) + nonce_offset
         # build transaction
         tx = accounts[from_account]['contract'].functions.sendCash(
             accounts[to_account]['address'], 
@@ -198,14 +217,21 @@ def send_cash(from_account, to_account, amount, gas_scale=GAS_SCALE):
         print('sending transaction...')
         tx_hash = web3.eth.sendRawTransaction(signed_tx.rawTransaction)
         print('waiting for transaction receipt...')
-        web3.eth.waitForTransactionReceipt(tx_hash)
+        web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf)
         print('transaction completed')
 
-    # if the transaction is replacing a pending transaction, the gas price must be increased
-    except ValueError:
-        print('Retrying transaction with 20% higher gas price...')
-        # retry with higher gas price
-        return send_cash(from_account, to_account, amount, gas_scale*1.2)
+    # error handling
+    except Exception as e:
+        print(e)
+        if(str(e) == "{'code': -32000, 'message': 'already known'}"):
+            # wait 15 seconds for block to be mined
+            print('waiting for block to be mined...')
+            time.sleep(15)
+            return 
+        elif (str(e) == "{'code': -32000, 'message': 'insufficient funds for gas * price + value'}"):
+            time.sleep(15)
+            return(send_cash(from_account, to_account, amount, nonce_offset=1))
+        return
 
 def get_balance(account):
     #checks
@@ -217,7 +243,7 @@ def get_balance(account):
     return float(cash_contract.functions.balanceOf(accounts[account]['address']).call())/ 10**18
 
 # beer functions
-def mint_beer(to_account, amount, gas_scale=GAS_SCALE):
+def mint_beer(to_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
     print('minting ', amount, ' BEER to ', to_account)
     # checks
     try:
@@ -229,7 +255,7 @@ def mint_beer(to_account, amount, gas_scale=GAS_SCALE):
 
     try:
         # calculate nonce from keeper address
-        nonce = web3.eth.getTransactionCount(keeper_address)
+        nonce = web3.eth.getTransactionCount(keeper_address) + nonce_offset
         # build transaction
         tx = beer_contract.functions.mint(
             accounts[to_account]['address'], 
@@ -254,16 +280,27 @@ def mint_beer(to_account, amount, gas_scale=GAS_SCALE):
         print('sending transaction...')
         tx_hash = web3.eth.sendRawTransaction(signed_tx.rawTransaction)
         print('waiting for transaction receipt...')
-        web3.eth.waitForTransactionReceipt(tx_hash)
+        web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf)
         print('transaction completed')
 
-    # if the transaction is replacing a pending transaction, the gas price must be increased
-    except ValueError:
-        print('Retrying transaction with 20% higher gas price...')
-        # retry with higher gas price
-        return mint_beer(to_account, amount, gas_scale*1.2)
+    # error handling
+    except Exception as e:
+        print(e)
+        if(str(e) == "{'code': -32000, 'message': 'already known'}"):
+            # wait 15 seconds for block to be mined
+            print('waiting for block to be mined...')
+            time.sleep(15)
+            return 
+        elif (str(e) == "{'code': -32000, 'message': 'insufficient funds for gas * price + value'}"):
+            time.sleep(15)
+            return(mint_beer(to_account, amount, nonce_offset=1))
+        elif(str(e) == "{'code': -32000, 'message': 'replacement transaction underpriced'}"):
+            # wait for 15 seconds and retry with the minimum 10% higher gas (*1.11 for rounding error purposes)
+            time.sleep(15)
+            return(mint_beer(to_account, amount, gas_scale=1.11, nonce_offset=1))
+        return
 
-def burn_beer(from_account, amount, gas_scale=GAS_SCALE):
+def burn_beer(from_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
     print('burning ', amount, 'BEER from', from_account,'...')
     if amount > get_inventory(from_account):
         amount = get_inventory(from_account)
@@ -278,7 +315,7 @@ def burn_beer(from_account, amount, gas_scale=GAS_SCALE):
 
     try:
         # calculate nonce from keeper address
-        nonce = web3.eth.getTransactionCount(keeper_address)
+        nonce = web3.eth.getTransactionCount(keeper_address) + nonce_offset
         # build transaction
         tx = beer_contract.functions.burn(
             accounts[from_account]['address'], 
@@ -296,30 +333,40 @@ def burn_beer(from_account, amount, gas_scale=GAS_SCALE):
         tx_hash = web3.eth.sendRawTransaction(signed_tx.rawTransaction)
         print('tx hash:', web3.toHex(tx_hash))
         print('waiting for transaction receipt...')
-        web3.eth.waitForTransactionReceipt(tx_hash)
+        web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf)
         print('transaction successful')
         
-    # if the transaction is replacing a pending transaction, the gas price must be increased
-    except ValueError:
-        print('Retrying transaction with 20% higher gas price...')
-        # retry with higher gas price
-        return burn_beer(from_account, amount, gas_scale*1.2)
+    # error handling
+    except Exception as e:
+        print(e)
+        if(str(e) == "{'code': -32000, 'message': 'already known'}"):
+            # wait 15 seconds for block to be mined
+            print('waiting for block to be mined...')
+            time.sleep(15)
+            return 
+        elif (str(e) == "{'code': -32000, 'message': 'insufficient funds for gas * price + value'}"):
+            time.sleep(15)
+            return(burn_beer(from_account, amount, nonce_offset=1))
+        return
 
-def send_beer(from_account, to_account, amount, gas_scale=GAS_SCALE):
+def send_beer(from_account, to_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
     print('sending ', amount, 'BEER from', from_account, 'to', to_account, '...')
+    inventory = get_inventory(from_account)
+    if amount > inventory: 
+        amount = inventory
     # checks
     try:
         assert from_account in accounts.keys(), 'Invalid account'
         assert to_account in accounts.keys(), 'Invalid account'
         assert amount > 0, 'Invalid amount'
-        assert amount <= get_inventory(from_account), 'Insufficient inventory'
+        # assert amount <= get_inventory(from_account), 'Insufficient inventory'
     except AssertionError as e:
         print(e)
         return
     
     try:
         # calculate nonce from keeper address
-        nonce = web3.eth.getTransactionCount(keeper_address)
+        nonce = web3.eth.getTransactionCount(keeper_address) + nonce_offset
         # build transaction
         tx = accounts[from_account]['contract'].functions.sendBeer(
             accounts[to_account]['address'], 
@@ -336,14 +383,21 @@ def send_beer(from_account, to_account, amount, gas_scale=GAS_SCALE):
         print('sending transaction...')
         tx_hash = web3.eth.sendRawTransaction(signed_tx.rawTransaction)
         print('waiting for transaction receipt...')
-        web3.eth.waitForTransactionReceipt(tx_hash)
+        web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf)
         print('transaction completed')
             
-    # if the transaction is replacing a pending transaction, the gas price must be increased
-    except ValueError as e:
-        print('Retrying transaction with 20% higher gas price...')
-        # retry with higher gas price
-        return send_beer(from_account, to_account, amount, gas_scale*1.2)
+    # error handling
+    except Exception as e:
+        print(e)
+        if(str(e) == "{'code': -32000, 'message': 'already known'}"):
+            # wait 15 seconds for block to be mined
+            print('waiting for block to be mined...')
+            time.sleep(15)
+            return
+        elif (str(e) == "{'code': -32000, 'message': 'insufficient funds for gas * price + value'}"):
+            time.sleep(15)
+            return(send_beer(from_account, to_account, amount, nonce_offset=1))
+        return
     
 def get_inventory(account):
     # checks
@@ -405,7 +459,7 @@ class BeerGameEnv(Env):
         self.action_space = Box(low=0, high=100, shape=(1,), dtype=np.int64)
         # 8x continuous float32 observation space
         # own BEER balance
-        # own ETH balance
+        # own CASH balance
         # own BEER backorder
         # supplier's BEER backorder
         # deliveries made to client
@@ -421,15 +475,15 @@ class BeerGameEnv(Env):
         
         
         '''for account in accounts:
-            print(account, get_balance(account), 'ETH')
+            print(account, get_balance(account), 'CASH')
             print(account, get_inventory(account), 'BEER')
 
         print('--------------------------------')'''
         
         # check if game is done
         if self.round >= ROUNDS-1:
-
-            # create a dataframe
+            # dataframe functionality, may be used in future versions for archiving games
+            '''# create a dataframe
             self.df = pd.DataFrame({
             'beer_price': self.beer_price[:ROUNDS-1],
             'demand': self.demand[:ROUNDS-1],
@@ -481,7 +535,7 @@ class BeerGameEnv(Env):
             'wholesaler_expenses': self.wholesaler_expenses[:ROUNDS+1],
             'distributor_expenses': self.distributor_expenses[:ROUNDS+1],
             'manufacturer_expenses': self.manufacturer_expenses[:ROUNDS+1]
-            })
+            })'''
             
             self.done = True
             print('Game complete.')
@@ -490,6 +544,12 @@ class BeerGameEnv(Env):
             self.done = False
         
         print('Round', self.round+1, 'of', ROUNDS)
+        print()
+        for account in accounts:
+            print(account)
+            print(get_balance(account), 'CASH')
+            print(get_inventory(account), 'BEER')
+            print()
         
         # store inventories for this round (after deliveries)
         self.manufacturer_inventory.append(get_inventory('manufacturer'))
@@ -550,13 +610,14 @@ class BeerGameEnv(Env):
             self.orders_from_wholesaler.append(max(0,round(self.base_stock[self.round] - self.wholesaler_position[self.round])))
             self.orders_from_distributor.append(action[0])
             self.orders_from_manufacturer.append(max(0,round(self.base_stock[self.round] - self.manufacturer_position[self.round])))
-
-        # send ETH corresponding to orders placed, a 50% markup is applied for each touchpoint in the supply chain
-        send_cash('market', 'retailer', self.orders_from_market[self.round]*self.beer_price[self.round]*3) # consumers purchase from retailer
+        print('orders:')
+        print()
+        # send CASH corresponding to orders placed, a 50% markup is applied for each touchpoint in the supply chain
+        mint_cash('retailer', self.orders_from_market[self.round]*self.beer_price[self.round]*3) # consumers purchase from retailer
         send_cash('retailer', 'wholesaler', self.orders_from_retailer[self.round]*self.beer_price[self.round]*2.5)
         send_cash('wholesaler', 'distributor', self.orders_from_wholesaler[self.round]*self.beer_price[self.round]*2)        
         send_cash('distributor', 'manufacturer', self.orders_from_distributor[self.round]*self.beer_price[self.round]*1.5)
-        send_cash('manufacturer', 'market', self.orders_from_manufacturer[self.round]*self.beer_price[self.round]) # cost to manufacture beer
+        burn_cash('manufacturer', self.orders_from_manufacturer[self.round]*self.beer_price[self.round]) # cost to manufacture beer
 
         # calculate and append expenses
         self.retailer_expenses.append(get_balance('retailer')-self.retailer_balance[self.round])
@@ -571,12 +632,15 @@ class BeerGameEnv(Env):
         self.deliveries_to_retailer.append(round(min(get_inventory('wholesaler'), self.orders_from_retailer[self.round] + self.wholesaler_backorder[self.round])))
         self.deliveries_to_market.append(round(min(get_inventory('retailer'), self.orders_from_market[self.round] + self.retailer_backorder[self.round])))
         
+        print()
+        print('deliveries:')
+        print()
         # send deliveries 
-        send_beer('market', 'manufacturer', self.deliveries_to_manufacturer[self.round])
+        mint_beer('retailer', self.deliveries_to_manufacturer[self.round])
         send_beer('manufacturer', 'distributor', self.deliveries_to_distributor[self.round])
         send_beer('distributor', 'wholesaler', self.deliveries_to_wholesaler[self.round])
         send_beer('wholesaler', 'retailer', self.deliveries_to_retailer[self.round])
-        send_beer('retailer', 'market', self.deliveries_to_market[self.round])
+        burn_beer('retailer', self.deliveries_to_market[self.round])
 
         # write to text logs (used for live graphs)
         with open('src/data/inventory.txt', 'a') as file:
@@ -595,27 +659,21 @@ class BeerGameEnv(Env):
             file.write(str(self.round)+', '+str(self.retailer_balance[self.round])+', '+str(self.wholesaler_balance[self.round])+
                        ', '+str(self.distributor_balance[self.round])+', '+str(self.manufacturer_balance[self.round])+'\n')
 
-
-        # reward functions
-        self.reward = -1*self.distributor_backorder[self.round] + (self.deliveries_to_wholesaler[self.round]-self.orders_from_wholesaler[self.round]) + 0.8*(self.distributor_balance[self.round]-self.distributor_balance[self.round-1])/self.beer_price[self.round] - 0.8*abs(sum(self.orders_from_wholesaler[-4:])-self.distributor_inventory[self.round])
+        # reward function
+        self.reward = (self.deliveries_to_wholesaler[self.round]-self.orders_from_wholesaler[self.round]) - self.distributor_backorder[self.round]+ (self.distributor_balance[self.round]-self.distributor_balance[self.round-1])/self.beer_price[self.round]
         
-        print(self.observation)
-        '''print('Inventory:',self.observation[0])
+        print()
+        print('Observations:')
+        print('Inventory:',self.observation[0])
         print('Balance:',self.observation[1])
         print('Client Order:',self.observation[2])
         print('Own Order:',self.observation[3])
         print('Own Backorder:',self.observation[4])
         print('Supplier Backorder:',self.observation[5])
         print('Deliveries Received:',self.observation[6])
-        print('Deliveries Made:',self.observation[7])'''
-        print(action)
-        print('--------------------------')
-        
-        # print('market orders',self.orders_from_market)
-        # print('retailer orders',self.orders_from_retailer)
-        # print('wholesaler orders',self.orders_from_wholesaler)
-        # print('distributor orders',self.orders_from_distributor)
-        # print('manufacturer orders',self.orders_from_manufacturer)
+        print('Deliveries Made:',self.observation[7])
+        print('Distributor agent action: order ', action, ' BEER')
+        print()
     
         # set placeholder info
         info = {}
@@ -701,16 +759,14 @@ class BeerGameEnv(Env):
         
         # geometric brownian motion for demand and BEER price
         self.demand = GBM(STARTING_DEMAND, 0.4, 0.25, 1/ROUNDS, 1).prices
-        self.beer_price = GBM(STARTING_BEER_PRICE, 0.8, 0.5, 1/ROUNDS, 1).prices
+        self.beer_price = GBM(STARTING_BEER_PRICE, 0.24, 0.4, 1/ROUNDS, 1).prices
         
-        # set round to zero
+        # set round to -1 (so that it starts at 0)
         self.round = -1
-        
         self.done = False
         
         # set observation
         self.observation = [0,0,0,0,0,0,0,0]
-        
         self.observation = np.array(self.observation, dtype=object)
         
         return self.observation
