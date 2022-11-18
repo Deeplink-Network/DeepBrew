@@ -26,10 +26,6 @@ GAS_SCALE = 2
 KEEPER_KEY = dotenv.dotenv_values(".env")['KEEPER_KEY']
 INFURA_KEY = dotenv.dotenv_values(".env")['INFURA_KEY']
 
-'''# KEYS
-KEEPER_KEY = dotenv.dotenv_values("./keys/.env")['KEEPER_KEY']
-INFURA_KEY = dotenv.dotenv_values("./keys/.env")['INFURA_KEY']'''
-
 # INFURA AND WEB3
 node_url = f'https://goerli.infura.io/v3/{INFURA_KEY}'
 web3 = Web3(Web3.HTTPProvider(node_url))
@@ -151,7 +147,7 @@ def mint_cash(to_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
         return 
 
 def burn_cash(from_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
-    print('burning ', amount, 'cash from ', from_account,'...')
+    print('burning', amount, 'cash from', from_account)
     balance = get_balance(from_account)
     if amount > balance:
         amount = balance
@@ -280,11 +276,11 @@ def get_balance(account):
 
 # beer functions
 def mint_beer(to_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
-    print('minting ', amount, ' BEER to ', to_account)
+    print('minting', amount, 'BEER to', to_account)
     # checks
     try:
         assert to_account in accounts.keys(), 'Invalid account'
-        assert amount >= 1, 'Invalid amount'    
+        assert amount >= 1, 'Invalid amount'
     except AssertionError as e:
         print(e)
         return
@@ -343,7 +339,7 @@ def mint_beer(to_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
         return 
 
 def burn_beer(from_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
-    print('burning ', amount, 'BEER from', from_account,'...')
+    print('burning', amount, 'BEER from', from_account)
     if amount > get_inventory(from_account):
         amount = get_inventory(from_account)
     # checks
