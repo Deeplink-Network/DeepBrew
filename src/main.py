@@ -8,4 +8,4 @@ if __name__ == '__main__':
         run_api.wait()
         run_model.wait()
     except KeyboardInterrupt:
-        subprocess.Popen(['sudo', 'pkill', 'python'])
+        subprocess.Popen(['sudo', 'pkill', 'python']).wait()
