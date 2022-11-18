@@ -9,8 +9,8 @@ from keras import layers
 import sac_dqn_run
 
 # open and close loss and rewardfiles to clear the contents
-open('src/data/loss.txt', 'w').close()
-open('src/data/reward.txt', 'w').close()
+open('data/loss.txt', 'w').close()
+open('data/reward.txt', 'w').close()
 
 # neural network shapes
 num_inputs = 8
@@ -99,7 +99,7 @@ def learn():
             # running reward is tracked here, giving the actual progress over time 
             reward_track.append(running_reward)
             # write running reward to file
-            with open('src/data/reward.txt', 'a') as file:
+            with open('data/reward.txt', 'a') as file:
                 file.write(str(episode_count)+', '+str(running_reward) + '\n')
 
             # calculate expected value from rewards
@@ -143,7 +143,7 @@ def learn():
             # save loss
             loss_track.append(loss_value)
             # write loss to file
-            with open('src/data/loss.txt', 'a') as file:
+            with open('data/loss.txt', 'a') as file:
                 file.write(str(episode_count)+', '+str(loss_value.numpy()) + '\n') 
 
             # clear loss and reward history
@@ -160,17 +160,17 @@ def learn():
         df = env.df
 
         # normal saving at every time step
-        model.save_weights("src/models/Actor_Critic.h5")
+        model.save_weights("models/Actor_Critic.h5")
         # running reward condition to consider the task solved, this number is relatively arbitrary
         if running_reward > 1500:  
             print("Solved at episode {}!".format(episode_count))
             # save the model once the running reward condition is met
-            model.save_weights("src/models/Final_Weights_Actor_Critic.h5")
+            model.save_weights("models/Final_Weights_Actor_Critic.h5")
             break
 
     # save reward and loss plot data in model directory 
-    np.save("src/models/Reward_Plot_data.npy", reward_track, allow_pickle=True)
-    np.save("src/models/Loss_Plot_data.npy", loss_track, allow_pickle=True)
+    np.save("models/Reward_Plot_data.npy", reward_track, allow_pickle=True)
+    np.save("models/Loss_Plot_data.npy", loss_track, allow_pickle=True)
     
 if __name__ == '__main__':
     # start training
@@ -183,7 +183,7 @@ if __name__ == '__main__':
         print('continuing training...')
         try: 
             print('loading weights...')
-            model.load_weights("src/models/Actor_Critic.h5")
+            model.load_weights("models/Actor_Critic.h5")
         except Exception as e:
             print(e)
         learn()

@@ -4,7 +4,6 @@ SOURCE: https://towardsdatascience.com/geometric-brownian-motion-559e25382a55
 used to generate the random numbers used for the beer game's market demand and beer price
 '''
 
-import matplotlib.pyplot as plt
 import numpy as np
 import math
 

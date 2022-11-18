@@ -41,9 +41,9 @@ def run_model():
     model = keras.Model(inputs=inputs, outputs=[action, critic])
     model.build(input_shape = num_inputs)
     try:
-        model.load_weights("src/models/Final_Weights_Actor_Critic.h5")
+        model.load_weights("models/Final_Weights_Actor_Critic.h5")
     except:
-        model.load_weights("src/models/Actor_Critic.h5")
+        model.load_weights("models/Actor_Critic.h5")
 
     print()
     print('running trained model...')
