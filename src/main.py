@@ -1,8 +1,9 @@
 import subprocess
 
+run_api = subprocess.Popen(["python3", "api.py"]) 
+run_model = subprocess.Popen(["python3", "sac_dqn_learn.py"])
+
 if __name__ == '__main__':
-    run_api = subprocess.Popen(["python3", "api.py"]) 
-    run_model = subprocess.Popen(["python3", "sac_dqn_learn.py"])
     
     try:
         run_api
