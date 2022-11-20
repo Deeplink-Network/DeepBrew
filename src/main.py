@@ -1,7 +1,7 @@
 import subprocess
 import dotenv
 
-subdomain = dotenv.get('SUBDOMAIN')
+subdomain = dotenv.dotenv_values(".env")['SUBDOMAIN']
 
 if __name__ == '__main__':
     launch_ngrok = subprocess.Popen(['sudo', 'ngrok', 'http', f'--subdomain={subdomain}', '7777'])
