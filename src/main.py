@@ -1,11 +1,16 @@
 import subprocess
+import dotenv
+
+subdomain = dotenv.get('SUBDOMAIN')
 
 if __name__ == '__main__':
+    launch_ngrok = subprocess.Popen(['sudo', 'ngrok', 'http', f'--subdomain={subdomain}', '7777'])
     run_api = subprocess.Popen(["python3", "api.py"]) 
     run_model = subprocess.Popen(["python3", "sac_dqn_learn.py"])
     
     try:
-        run_api.wait()
-        run_model.wait()
+        launch_ngrok
+        run_api
+        run_model
     except KeyboardInterrupt:
         subprocess.Popen(['sudo', 'pkill', 'python']).wait()
