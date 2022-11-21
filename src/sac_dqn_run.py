@@ -16,7 +16,7 @@ env = BeerGameEnv()
 
 # neural network shapes
 num_inputs = 8
-num_actions = 100
+num_actions = 200
 num_hidden = 64
 
 # action, critic, and reward arrays
@@ -26,7 +26,7 @@ rewards_history = []
 
 def run_model():
     print()
-    print('reloading with trained model...')
+    print('loading trained model...')
     # define neural network layers
     inputs = layers.Input(shape=(num_inputs,))
     dense = layers.Dense(num_hidden, activation="relu")(inputs)

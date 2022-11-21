@@ -14,7 +14,7 @@ open('data/reward.txt', 'w').close()
 
 # neural network shapes
 num_inputs = 8
-num_actions = 100
+num_actions = 200
 num_hidden = 64
 
 # define neural network layers

@@ -1,0 +1,22 @@
+version: '3.4'
+
+services:
+  deepbrew:
+    image: deepbrew
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - 7777:7777
+
+  ngrok:
+    image: shkoliar/ngrok
+    ports:
+      - 4551:4551
+    links:
+      - web
+    networks:
+      - development
+    environment:
+      - DOMAIN=deepbrew
+      - PORT=7777

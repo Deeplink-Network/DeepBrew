@@ -515,7 +515,7 @@ class BeerGameEnv(Env):
         # a game runs for 60 rounds
         # 1x continuous integer action space
         # the amount of BEER the agent orders each round 
-        self.action_space = Box(low=0, high=100, shape=(1,), dtype=np.int64)
+        self.action_space = Box(low=0, high=200, shape=(1,), dtype=np.int64)
         # 8x continuous float32 observation space
         # own BEER balance
         # own CASH balance
