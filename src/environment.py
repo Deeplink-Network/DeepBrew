@@ -16,9 +16,9 @@ import dotenv
 
 # GLOBAL VARIABLES
 STARTING_DEMAND = 10
-STARTING_BALANCE = 20_000
+STARTING_BALANCE = 100_000
 STARTING_INVENTORY = 10
-STARTING_BEER_PRICE = 5
+STARTING_BEER_PRICE = 2
 ROUNDS = 60
 GAS_SCALE = 2
 
@@ -659,16 +659,16 @@ class BeerGameEnv(Env):
         # calculate replenishment orders (base-stock policy), order zero if inventory position is greater than the base-stock
         if self.retailer_inventory[self.round] > sum(self.demand[:-4]):
             self.orders_from_market.append(round(self.demand[self.round])) # market demand order from retailer
-            self.orders_from_retailer.append(max(0,round((self.base_stock[self.round] - self.retailer_position[self.round])/10)))
-            self.orders_from_wholesaler.append(max(0,round((self.base_stock[self.round] - self.wholesaler_position[self.round])/10)))
+            self.orders_from_retailer.append(min(max(0,round((self.base_stock[self.round] - self.retailer_position[self.round])/10)), 200))
+            self.orders_from_wholesaler.append(min(max(0,round((self.base_stock[self.round] - self.wholesaler_position[self.round])/10)), 200))
             self.orders_from_distributor.append(action[0])
-            self.orders_from_manufacturer.append(max(0,round((self.base_stock[self.round] - self.manufacturer_position[self.round])/10)))
+            self.orders_from_manufacturer.append(min(max(0,round((self.base_stock[self.round] - self.manufacturer_position[self.round])/10)), 200))
         else:
             self.orders_from_market.append(round(self.demand[self.round])) # market demand order from retailer
-            self.orders_from_retailer.append(max(0,round(self.base_stock[self.round] - self.retailer_position[self.round])))
-            self.orders_from_wholesaler.append(max(0,round(self.base_stock[self.round] - self.wholesaler_position[self.round])))
+            self.orders_from_retailer.append(min(max(0,round(self.base_stock[self.round] - self.retailer_position[self.round])), 200))
+            self.orders_from_wholesaler.append(min(max(0,round(self.base_stock[self.round] - self.wholesaler_position[self.round])), 200))
             self.orders_from_distributor.append(action[0])
-            self.orders_from_manufacturer.append(max(0,round(self.base_stock[self.round] - self.manufacturer_position[self.round])))
+            self.orders_from_manufacturer.append(min(max(0,round(self.base_stock[self.round] - self.manufacturer_position[self.round])),200))
         print('orders:')
         print()
         # send CASH corresponding to orders placed, a 50% markup is applied for each touchpoint in the supply chain
