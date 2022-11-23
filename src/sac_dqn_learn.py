@@ -46,21 +46,21 @@ gamma = 0.899
 # initialize the adam auto-optimizer
 optimizer = keras.optimizers.Adam(learning_rate=0.0001) 
 
-# setup variables for performance tracking
-huber_loss = keras.losses.Huber() 
-action_probs_history = []
-critic_value_history = []
-rewards_history = []
-running_reward = 0
-episode_count = 0
-eps = np.finfo(np.float32).eps.item()
-
-# model = SAC("MlpPolicy", env, verbose=1)
-# model.learn(total_timesteps=10000, log_interval=1)
-
-loss_track = []
-reward_track = []
 def learn():
+    # setup variables for performance tracking
+    huber_loss = keras.losses.Huber() 
+    action_probs_history = []
+    critic_value_history = []
+    rewards_history = []
+    running_reward = 0
+    episode_count = 0
+    eps = np.finfo(np.float32).eps.item()
+
+    # model = SAC("MlpPolicy", env, verbose=1)
+    # model.learn(total_timesteps=10000, log_interval=1)
+
+    loss_track = []
+    reward_track = []
     while True:
         _ = env.reset()
         obs = env.observation_space.sample()
