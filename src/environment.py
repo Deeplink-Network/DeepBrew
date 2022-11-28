@@ -13,6 +13,7 @@ from gbm import GBM
 import json
 import time
 import dotenv
+import datetime
 
 # GLOBAL VARIABLES
 STARTING_DEMAND = 10
@@ -529,6 +530,10 @@ class BeerGameEnv(Env):
                                      shape=(1,8), dtype=np.float32) 
         
     def step(self, action):   
+        # print a timestamp
+        print()
+        print('round', self.round)
+        print('time:', datetime.datetime.now())
         # increase round by 1
         self.round += 1
         
