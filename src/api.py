@@ -1,6 +1,11 @@
 from flask import *
 from flask_cors import CORS
 import json
+import logging
+
+# turn off logging, helps diagnose issues with the game
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
 app = Flask(__name__)
 CORS(app)
