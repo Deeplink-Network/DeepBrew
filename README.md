@@ -1,6 +1,6 @@
 # DeepBrew: Deep Q-learning for an On-chain Beer Game
 ## Connecting off-chain deep learning to on-chain Ethereum execution
-A live demonstration of this project can be found at v1.deeplink.network
+A live demonstration of this project can be found [here.](https://v1.deeplink.network/)
 
 DeepBrew is an open-source research project which began as an undergraduate thesis topic and has expanded into an area of focus for Deeplink. It is an on-chain implementation of The Beer Game, a famous macroeconomics board game in which four players must optimize a supply chain, exchanging beer for money-our version uses ERC20 tokens on the Goerli Ethereum test-network, on which players are represented by smart contracts, and are given algorithmic behavioural strategies inspired by the popular 'base-stock' policy for The Beer Game. This game is also then represented as an OpenAI Gym class for reinforcement learning.
 
