@@ -21,7 +21,7 @@ STARTING_BALANCE = 100_000
 STARTING_INVENTORY = 10
 STARTING_BEER_PRICE = 2
 ROUNDS = 60
-GAS_SCALE = 2
+GAS_SCALE = 1
 
 # KEYS
 KEEPER_KEY = dotenv.dotenv_values(".env")['KEEPER_KEY']
@@ -664,10 +664,11 @@ class BeerGameEnv(Env):
         # calculate replenishment orders (base-stock policy), order zero if inventory position is greater than the base-stock
         if self.retailer_inventory[self.round] > sum(self.demand[:-4]):
             self.orders_from_market.append(round(self.demand[self.round])) # market demand order from retailer
-            self.orders_from_retailer.append(min(max(0,round((self.base_stock[self.round] - self.retailer_position[self.round])/10)), 200))
-            self.orders_from_wholesaler.append(min(max(0,round((self.base_stock[self.round] - self.wholesaler_position[self.round])/10)), 200))
+            self.orders_from_retailer.append(max(0,round((self.base_stock[self.round] - self.retailer_position[self.round])/10)))
+            self.orders_from_wholesaler.append(max(0,round((self.base_stock[self.round] - self.wholesaler_position[self.round])/10)))
             self.orders_from_distributor.append(action[0])
-            self.orders_from_manufacturer.append(min(max(0,round((self.base_stock[self.round] - self.manufacturer_position[self.round])/10)), 200))
+            self.orders_from_manufacturer.append(max(0,round((self.base_stock[self.round] - self.manufacturer_position[self.round])/10)))
+
         else:
             self.orders_from_market.append(round(self.demand[self.round])) # market demand order from retailer
             self.orders_from_retailer.append(min(max(0,round(self.base_stock[self.round] - self.retailer_position[self.round])), 200))
@@ -724,7 +725,7 @@ class BeerGameEnv(Env):
                        ', '+str(self.distributor_balance[self.round])+', '+str(self.manufacturer_balance[self.round])+'\n')
 
         # reward function
-        self.reward = (self.deliveries_to_wholesaler[self.round]-self.orders_from_wholesaler[self.round]) - self.distributor_backorder[self.round]+ (self.distributor_balance[self.round]-self.distributor_balance[self.round-1])/self.beer_price[self.round]
+        self.reward = (self.deliveries_to_wholesaler[self.round]-self.orders_from_wholesaler[self.round]) - (self.distributor_backorder[self.round] + self.manufacturer_backorder[self.round]) + (self.distributor_balance[self.round]-self.distributor_balance[self.round-1])/self.beer_price[self.round]
         
         print()
         print('Observations:')
