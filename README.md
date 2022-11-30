@@ -1,42 +1,9 @@
-# Introducing DeepBrew
-DeepBrew is an open-source research project which began as an undergraduate thesis topic and has expanded into an area of focus for Deeplink, this repository is a work in progress. DeepBrew is an on-chain implementation of The Beer Game, a famous macroeconomics board game in which four players must optimize a supply chain, exchanging beer for money-our version uses ERC20 tokens on an Ethereum test-network, on which players are represented by addresses, and are given algorithmic behavioural strategies inspired by the popular 'base-stock' policy for The Beer Game. 
+# DeepBrew: Deep Q-learning for an On-chain Beer Game
+## Connecting off-chain deep learning to on-chain Ethereum execution
+A live demonstration of this project can be found at v1.deeplink.network
 
-In addition to the game environemnt, DeepBrew also includes a soft actor-critic deep Q-learning model tuned to play the game optimally as the distributor agent. We propose that DeepBrew's On-chain Beer Game can serve both as a demonstration of Deeplink's proposed 'Cluster' architecture, and as a standard for evaulating the performance of off-to-on-chain machine learning techniques. We also would like to invite the broader community to try their hand at further optimising and improving the system with their own machine learning and middleware solutions.
+DeepBrew is an open-source research project which began as an undergraduate thesis topic and has expanded into an area of focus for Deeplink. It is an on-chain implementation of The Beer Game, a famous macroeconomics board game in which four players must optimize a supply chain, exchanging beer for money-our version uses ERC20 tokens on the Goerli Ethereum test-network, on which players are represented by smart contracts, and are given algorithmic behavioural strategies inspired by the popular 'base-stock' policy for The Beer Game. This game is also then represented as an OpenAI Gym class for reinforcement learning.
 
-Stay tuned for further developments as we migrate the system further on-chain via the implementation of smart contract and keeper pairs in lieu of Web3 wallet transactions, along with an interactive GUI frontend demonstration hosted in IPFS.
+In addition to the game environemnt, DeepBrew also showcases a soft actor-critic deep Q-learning model tuned to play the game optimally as the distributor agent. This research project effectively proposes and demonstrates a prototype methodology for the recreation of a Web3 problem as a reinforcement learning problem, the training of an AI agent to optimize that problem, and the connection of these components to EVM blockchains, an amalgamation which we refer to as 'on-chain agents'. The lessons learned from the development and deployment of this system will be utilized in Deeplink's upcoming 'Cluster' projects.
 
-# Using DeepBrew Ganache
-## DEPENDENCIES
-### LANGUAGES
-* python
-* node.js
-* solidity
-### NPM PACKAGES
-* ganache-cli
-* truffle
-### CONDA PACKAGES
-* pytorch
-* tensorboard
-* gym
-* stable-baselines3
-* tensorflow
-### PIP PACKAGES
-* web3
-* ethtoken
-## RUNNING THE GAME
-#### TERMINAL 1
-Launch a terminal and start up the ganache testnet using the mnemonic to generate the exact wallets and private keys used in the code, give each agent an arbitrarily large balance.
-* ganache-cli -d -m myth like bonus scare over problem client lizard pioneer submit female collect -a 5 -e 10000000 -l 10000000 --db ./ganache_db
-
-#### TERMINAL 2
-Deploy the DeepBrew ERC20 contract onto the now running testnet.
-
-* cd truffle
-* truffle migrate
-
-Optional: check that the contract was deployed correctly.
-
-* truffle console
-* const deepbrew = await DeepBrew.deployed()
-* (await deepbrew.totalSupply()).toString()
-* (await deepbrew.balanceOf('0xFE41FE950d4835bD539AC24fBaaDED16b2E32922')).toString()
+We propose that DeepBrew's On-chain Beer Game can serve both as a demonstration of Deeplink's proposed 'Cluster' architecture, and as a standard for evaulating the performance of off-to-on-chain machine learning techniques. We also would like to invite the broader community to try their hand at further optimising and improving the system with their own machine learning and middleware solutions.
