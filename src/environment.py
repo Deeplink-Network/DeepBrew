@@ -122,7 +122,7 @@ def mint_cash(to_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
         tx_hash = web3.eth.sendRawTransaction(signed_tx.rawTransaction)
         print('tx hash:', web3.toHex(tx_hash))
         print('waiting for transaction receipt...')
-        web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf, poll_latency = 1)
+        web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf, poll_latency = 1.5)
         print('transaction completed')
     
     # error handling
@@ -180,7 +180,7 @@ def burn_cash(from_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
         tx_hash = web3.eth.sendRawTransaction(signed_tx.rawTransaction)
         print('tx hash:', web3.toHex(tx_hash))
         print('waiting for transaction receipt...')
-        web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf, poll_latency = 1)
+        web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf, poll_latency = 1.5)
         print('transaction completed')
             
     # error handling
@@ -241,7 +241,7 @@ def send_cash(from_account, to_account, amount, gas_scale=GAS_SCALE, nonce_offse
         tx_hash = web3.eth.sendRawTransaction(signed_tx.rawTransaction)
         print('tx hash:', web3.toHex(tx_hash))
         print('waiting for transaction receipt...')
-        web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf, poll_latency = 1)
+        web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf, poll_latency = 1.5)
         print('transaction completed')
 
     # error handling
@@ -314,7 +314,7 @@ def mint_beer(to_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
         tx_hash = web3.eth.sendRawTransaction(signed_tx.rawTransaction)
         print('tx hash:', web3.toHex(tx_hash))
         print('waiting for transaction receipt...')
-        web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf, poll_latency = 1)
+        web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf, poll_latency = 1.5)
         print('transaction completed')
 
     # error handling
@@ -372,7 +372,7 @@ def burn_beer(from_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
         tx_hash = web3.eth.sendRawTransaction(signed_tx.rawTransaction)
         print('tx hash:', web3.toHex(tx_hash))
         print('waiting for transaction receipt...')
-        web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf, poll_latency = 1)
+        web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf, poll_latency = 1.5)
         print('transaction completed')
         
     # error handling
@@ -432,7 +432,7 @@ def send_beer(from_account, to_account, amount, gas_scale=GAS_SCALE, nonce_offse
         tx_hash = web3.eth.sendRawTransaction(signed_tx.rawTransaction)
         print('tx hash:', web3.toHex(tx_hash))
         print('waiting for transaction receipt...')
-        web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf, poll_latency = 1)
+        web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf, poll_latency = 1.5)
         print('transaction completed')
             
     # error handling
@@ -671,10 +671,10 @@ class BeerGameEnv(Env):
 
         else:
             self.orders_from_market.append(round(self.demand[self.round])) # market demand order from retailer
-            self.orders_from_retailer.append(min(max(0,round(self.base_stock[self.round] - self.retailer_position[self.round])), 200))
-            self.orders_from_wholesaler.append(min(max(0,round(self.base_stock[self.round] - self.wholesaler_position[self.round])), 200))
+            self.orders_from_retailer.append(max(0,round((self.base_stock[self.round] - self.retailer_position[self.round])/10)))
+            self.orders_from_wholesaler.append(max(0,round((self.base_stock[self.round] - self.wholesaler_position[self.round])/10)))
             self.orders_from_distributor.append(action[0])
-            self.orders_from_manufacturer.append(min(max(0,round(self.base_stock[self.round] - self.manufacturer_position[self.round])),200))
+            self.orders_from_manufacturer.append(max(0,round((self.base_stock[self.round] - self.manufacturer_position[self.round])/10)))
         print('orders:')
         print()
         # send CASH corresponding to orders placed, a 50% markup is applied for each touchpoint in the supply chain
