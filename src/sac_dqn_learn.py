@@ -157,7 +157,7 @@ def learn():
         print(template.format(running_reward, episode_count))
 
         # create a dataframe of each game
-        df = env.df
+        # df = env.df
 
         # normal saving at every time step
         model.save_weights("models/Actor_Critic.h5")
