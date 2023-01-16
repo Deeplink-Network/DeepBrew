@@ -131,20 +131,20 @@ def mint_cash(to_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
         if(str(e) == "{'code': -32000, 'message': 'already known'}"):
             # wait 300 seconds for block to be mined
             print('waiting for block to be mined...')
-            time.sleep(20)
+            time.sleep(120)
             return
         elif (str(e) == "{'code': -32000, 'message': 'insufficient funds for gas * price + value'}"):
             print('waiting for next block and retrying...')
-            time.sleep(20)
+            time.sleep(120)
             return(mint_cash(to_account, amount, nonce_offset=0))
         elif (str(e) == "{'code': -32000, 'message': 'replacement transaction underpriced'}"):
             print('retrying with 10% higher gas price...')
-            time.sleep(20)
+            time.sleep(120)
             return(mint_cash(to_account, amount, gas_scale=1.21, nonce_offset=0))
         elif (str(e) == "{'code': -32000, 'message': 'nonce too low'}"):
             print('retrying with nonce offset...')
-            time.sleep(20)
-            return(mint_cash(to_account, amount, gas_scale=1.21, nonce_offset=0))
+            time.sleep(120)
+            return(mint_cash(to_account, amount, gas_scale=1.21, nonce_offset=1))
         return 
 
 def burn_cash(from_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
@@ -189,20 +189,20 @@ def burn_cash(from_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
         if(str(e) == "{'code': -32000, 'message': 'already known'}"):
             # wait 300 seconds for block to be mined
             print('waiting for block to be mined...')
-            time.sleep(20)
+            time.sleep(120)
             return
         elif (str(e) == "{'code': -32000, 'message': 'insufficient funds for gas * price + value'}"):
             print('waiting for next block and retrying...')
-            time.sleep(20)
+            time.sleep(120)
             return(burn_cash(from_account, amount, nonce_offset=0))
         elif (str(e) == "{'code': -32000, 'message': 'replacement transaction underpriced'}"):
             print('retrying with 10% higher gas price...')
-            time.sleep(20)
+            time.sleep(120)
             return(burn_cash(from_account, amount, gas_scale=1.21 ,nonce_offset=0))
         elif (str(e) == "{'code': -32000, 'message': 'nonce too low'}"):
             print('retrying with nonce offset...')
-            time.sleep(20)
-            return(burn_cash(from_account, amount, nonce_offset=0))
+            time.sleep(120)
+            return(burn_cash(from_account, amount, nonce_offset=1))
         return 
     
 def send_cash(from_account, to_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
@@ -250,20 +250,20 @@ def send_cash(from_account, to_account, amount, gas_scale=GAS_SCALE, nonce_offse
         if(str(e) == "{'code': -32000, 'message': 'already known'}"):
             # wait 300 seconds for block to be mined
             print('waiting for block to be mined...')
-            time.sleep(20)
+            time.sleep(120)
             return
         elif (str(e) == "{'code': -32000, 'message': 'insufficient funds for gas * price + value'}"):
             print('waiting for next block and retrying...')
-            time.sleep(20)
+            time.sleep(120)
             return(send_cash(from_account, to_account, amount, nonce_offset=0))
         elif (str(e) == "{'code': -32000, 'message': 'replacement transaction underpriced'}"):
             print('retrying with 10% higher gas price...')
-            time.sleep(20)
+            time.sleep(120)
             return(send_cash(from_account, to_account, amount, gas_scale=1.21 ,nonce_offset=0))
         elif (str(e) == "{'code': -32000, 'message': 'nonce too low'}"):
             print('retrying with nonce offset...')
-            time.sleep(20)
-            return(send_cash(from_account, to_account, amount, gas_scale=1.21, nonce_offset=0))
+            time.sleep(120)
+            return(send_cash(from_account, to_account, amount, gas_scale=1.21, nonce_offset=1))
         return 
 
 def get_balance(account):
@@ -323,20 +323,20 @@ def mint_beer(to_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
         if(str(e) == "{'code': -32000, 'message': 'already known'}"):
             # wait 300 seconds for block to be mined
             print('waiting for block to be mined...')
-            time.sleep(20)
+            time.sleep(120)
             return
         elif (str(e) == "{'code': -32000, 'message': 'insufficient funds for gas * price + value'}"):
             print('waiting for next block and retrying...')
-            time.sleep(20)
+            time.sleep(120)
             return(mint_beer(to_account, amount, nonce_offset=0))
         elif (str(e) == "{'code': -32000, 'message': 'replacement transaction underpriced'}"):
             print('retrying with 10% higher gas price...')
-            time.sleep(20)
+            time.sleep(120)
             return(mint_beer(to_account, amount, gas_scale=1.21 ,nonce_offset=0))
         elif (str(e) == "{'code': -32000, 'message': 'nonce too low'}"):
             print('retrying with nonce offset...')
-            time.sleep(20)
-            return(mint_beer(to_account, amount, gas_scale=1.21, nonce_offset=0))
+            time.sleep(120)
+            return(mint_beer(to_account, amount, gas_scale=1.21, nonce_offset=1))
         return 
 
 def burn_beer(from_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
@@ -381,20 +381,20 @@ def burn_beer(from_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
         if(str(e) == "{'code': -32000, 'message': 'already known'}"):
             # wait 300 seconds for block to be mined
             print('waiting for block to be mined...')
-            time.sleep(20)
+            time.sleep(120)
             return
         elif (str(e) == "{'code': -32000, 'message': 'insufficient funds for gas * price + value'}"):
             print('waiting for next block and retrying...')
-            time.sleep(20)
+            time.sleep(120)
             return(burn_beer(from_account, amount, nonce_offset=0))
         elif (str(e) == "{'code': -32000, 'message': 'replacement transaction underpriced'}"):
             print('retrying with 10% higher gas price...')
-            time.sleep(20)
+            time.sleep(120)
             return(burn_beer(from_account, amount, gas_scale=1.21 ,nonce_offset=0))
         elif (str(e) == "{'code': -32000, 'message': 'nonce too low'}"):
             print('retrying with nonce offset...')
-            time.sleep(20)
-            return(burn_beer(from_account, amount, nonce_offset=0))
+            time.sleep(120)
+            return(burn_beer(from_account, amount, nonce_offset=1))
         return 
 
 def send_beer(from_account, to_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
@@ -441,20 +441,20 @@ def send_beer(from_account, to_account, amount, gas_scale=GAS_SCALE, nonce_offse
         if(str(e) == "{'code': -32000, 'message': 'already known'}"):
             # wait 300 seconds for block to be mined
             print('waiting for block to be mined...')
-            time.sleep(20)
+            time.sleep(120)
             return
         elif (str(e) == "{'code': -32000, 'message': 'insufficient funds for gas * price + value'}"):
             print('waiting for next block and retrying...')
-            time.sleep(20)
+            time.sleep(120)
             return(send_beer(from_account, to_account, amount, nonce_offset=0))
         elif (str(e) == "{'code': -32000, 'message': 'replacement transaction underpriced'}"):
             print('retrying with 10% higher gas price...')
-            time.sleep(20)
+            time.sleep(120)
             return(send_beer(from_account, to_account, amount, gas_scale=1.21 ,nonce_offset=0))
         elif (str(e) == "{'code': -32000, 'message': 'nonce too low'}"):
             print('retrying with nonce offset...')
-            time.sleep(20)
-            return(send_beer(from_account, to_account, amount, gas_scale=1.21, nonce_offset=0))
+            time.sleep(120)
+            return(send_beer(from_account, to_account, amount, gas_scale=1.21, nonce_offset=1))
         return 
 
 def get_inventory(account):
