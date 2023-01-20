@@ -21,7 +21,7 @@ STARTING_BALANCE = 100_000
 STARTING_INVENTORY = 10
 STARTING_BEER_PRICE = 2
 ROUNDS = 60
-GAS_SCALE = 1
+GAS_SCALE = 1.5
 
 # KEYS
 KEEPER_KEY = dotenv.dotenv_values(".env")['KEEPER_KEY']
@@ -122,7 +122,7 @@ def mint_cash(to_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
         tx_hash = web3.eth.sendRawTransaction(signed_tx.rawTransaction)
         print('tx hash:', web3.toHex(tx_hash))
         print('waiting for transaction receipt...')
-        web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf, poll_latency = 1.5)
+        web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf, poll_latency = 3)
         print('transaction completed')
     
     # error handling
@@ -180,7 +180,7 @@ def burn_cash(from_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
         tx_hash = web3.eth.sendRawTransaction(signed_tx.rawTransaction)
         print('tx hash:', web3.toHex(tx_hash))
         print('waiting for transaction receipt...')
-        web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf, poll_latency = 1.5)
+        web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf, poll_latency = 3)
         print('transaction completed')
             
     # error handling
@@ -241,7 +241,7 @@ def send_cash(from_account, to_account, amount, gas_scale=GAS_SCALE, nonce_offse
         tx_hash = web3.eth.sendRawTransaction(signed_tx.rawTransaction)
         print('tx hash:', web3.toHex(tx_hash))
         print('waiting for transaction receipt...')
-        web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf, poll_latency = 1.5)
+        web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf, poll_latency = 3)
         print('transaction completed')
 
     # error handling
@@ -314,7 +314,7 @@ def mint_beer(to_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
         tx_hash = web3.eth.sendRawTransaction(signed_tx.rawTransaction)
         print('tx hash:', web3.toHex(tx_hash))
         print('waiting for transaction receipt...')
-        web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf, poll_latency = 1.5)
+        web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf, poll_latency = 3)
         print('transaction completed')
 
     # error handling
@@ -372,7 +372,7 @@ def burn_beer(from_account, amount, gas_scale=GAS_SCALE, nonce_offset=0):
         tx_hash = web3.eth.sendRawTransaction(signed_tx.rawTransaction)
         print('tx hash:', web3.toHex(tx_hash))
         print('waiting for transaction receipt...')
-        web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf, poll_latency = 1.5)
+        web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf, poll_latency = 3)
         print('transaction completed')
         
     # error handling
@@ -432,7 +432,7 @@ def send_beer(from_account, to_account, amount, gas_scale=GAS_SCALE, nonce_offse
         tx_hash = web3.eth.sendRawTransaction(signed_tx.rawTransaction)
         print('tx hash:', web3.toHex(tx_hash))
         print('waiting for transaction receipt...')
-        web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf, poll_latency = 1.5)
+        web3.eth.waitForTransactionReceipt(tx_hash, timeout = np.inf, poll_latency = 3)
         print('transaction completed')
             
     # error handling
